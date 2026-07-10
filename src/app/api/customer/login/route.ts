@@ -1,9 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import {
+  CUSTOMER_SESSION_COOKIE_PATHS,
   createCustomerSessionPayload,
   CUSTOMER_SESSION_COOKIE_NAME,
-  getCustomerSessionCookieOptions
+  getCustomerSessionCookieOptions,
+  serializeExpiredCustomerSessionCookie
 } from "@/lib/customer-session";
 import { verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
@@ -43,6 +45,16 @@ export async function POST(request: NextRequest) {
 
   response.cookies.set(CUSTOMER_SESSION_COOKIE_NAME, token, options);
   response.cookies.set(SESSION_COOKIE_NAME, token, options);
+  for (const path of CUSTOMER_SESSION_COOKIE_PATHS.filter((cookiePath) => cookiePath !== "/")) {
+    response.headers.append(
+      "Set-Cookie",
+      serializeExpiredCustomerSessionCookie(CUSTOMER_SESSION_COOKIE_NAME, path)
+    );
+    response.headers.append(
+      "Set-Cookie",
+      serializeExpiredCustomerSessionCookie(SESSION_COOKIE_NAME, path)
+    );
+  }
 
   return response;
 }
