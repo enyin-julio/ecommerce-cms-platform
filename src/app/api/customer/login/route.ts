@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { setCustomerSessionCookie } from "@/lib/customer-session";
 import { verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
+import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/session-token";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -31,14 +31,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=invalid", request.url), 303);
   }
 
-  await setCustomerSessionCookie({
+  const session = {
     userId: user.id,
     email: user.email,
     name: user.name,
     role: "customer",
     merchantId: null,
     expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
+  } as const;
+  const token = await createSessionToken(session);
+  const response = NextResponse.redirect(new URL("/account", request.url), 303);
+
+  response.cookies.set(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: Math.floor((session.expiresAt - Date.now()) / 1000),
+    expires: new Date(session.expiresAt)
   });
 
-  return NextResponse.redirect(new URL("/account", request.url), 303);
+  return response;
 }
