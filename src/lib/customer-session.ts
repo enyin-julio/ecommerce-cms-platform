@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   createSessionToken,
+  SESSION_COOKIE_NAME,
   verifySessionToken,
   type AdminSession
 } from "@/lib/session-token";
@@ -14,7 +15,9 @@ export type CustomerSession = AdminSession & {
 
 export async function getCurrentCustomerSession() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(CUSTOMER_SESSION_COOKIE_NAME)?.value;
+  const token =
+    cookieStore.get(CUSTOMER_SESSION_COOKIE_NAME)?.value ||
+    cookieStore.get(SESSION_COOKIE_NAME)?.value;
   const session = await verifySessionToken(token);
 
   if (!session || session.role !== "customer") {
@@ -39,7 +42,7 @@ export async function setCustomerSessionCookie(session: CustomerSession) {
   const token = await createSessionToken(session);
   const maxAge = Math.max(0, Math.floor((session.expiresAt - Date.now()) / 1000));
 
-  cookieStore.set(CUSTOMER_SESSION_COOKIE_NAME, token, {
+  cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -53,6 +56,13 @@ export async function clearCustomerSessionCookie() {
   const cookieStore = await cookies();
 
   cookieStore.set(CUSTOMER_SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0
+  });
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
