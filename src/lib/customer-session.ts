@@ -15,6 +15,7 @@ export type CustomerSession = AdminSession & {
 };
 
 const CUSTOMER_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+export const CUSTOMER_SESSION_COOKIE_PATHS = ["/", "/account", "/account/orders"];
 
 export function getCustomerSessionCookieOptions(expiresAt: number) {
   return {
@@ -27,15 +28,32 @@ export function getCustomerSessionCookieOptions(expiresAt: number) {
   };
 }
 
-export function getExpiredCustomerSessionCookieOptions() {
+export function getExpiredCustomerSessionCookieOptions(path = "/") {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
-    path: "/",
+    path,
     maxAge: 0,
     expires: new Date(0)
   };
+}
+
+export function serializeExpiredCustomerSessionCookie(name: string, path: string) {
+  const attributes = [
+    `${name}=`,
+    `Path=${path}`,
+    "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    "Max-Age=0",
+    "HttpOnly",
+    "SameSite=Lax"
+  ];
+
+  if (process.env.NODE_ENV === "production") {
+    attributes.push("Secure");
+  }
+
+  return attributes.join("; ");
 }
 
 export function createCustomerSessionPayload(user: {
@@ -57,16 +75,20 @@ export async function getCurrentCustomer() {
   noStore();
 
   const cookieStore = await cookies();
-  const token =
-    cookieStore.get(CUSTOMER_SESSION_COOKIE_NAME)?.value ||
-    cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const session = await verifySessionToken(token);
+  const tokens = [
+    ...cookieStore.getAll(CUSTOMER_SESSION_COOKIE_NAME).map((cookie) => cookie.value),
+    ...cookieStore.getAll(SESSION_COOKIE_NAME).map((cookie) => cookie.value)
+  ];
 
-  if (!session || session.role !== "customer") {
-    return null;
+  for (const token of tokens) {
+    const session = await verifySessionToken(token);
+
+    if (session?.role === "customer") {
+      return session as CustomerSession;
+    }
   }
 
-  return session as CustomerSession;
+  return null;
 }
 
 export const getCurrentCustomerSession = getCurrentCustomer;
