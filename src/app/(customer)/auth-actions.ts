@@ -5,6 +5,7 @@ import { z } from "zod";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import {
   clearCustomerSessionCookie,
+  createCustomerSessionPayload,
   setCustomerSessionCookie
 } from "@/lib/customer-session";
 import { prisma } from "@/lib/prisma";
@@ -43,14 +44,7 @@ export async function customerLoginAction(formData: FormData) {
     redirect("/login?error=invalid");
   }
 
-  await setCustomerSessionCookie({
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-    role: "customer",
-    merchantId: null,
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
-  });
+  await setCustomerSessionCookie(createCustomerSessionPayload(user));
 
   redirect("/account");
 }
@@ -91,14 +85,7 @@ export async function customerRegisterAction(formData: FormData) {
     }
   });
 
-  await setCustomerSessionCookie({
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-    role: "customer",
-    merchantId: null,
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
-  });
+  await setCustomerSessionCookie(createCustomerSessionPayload(user));
 
   redirect("/account");
 }

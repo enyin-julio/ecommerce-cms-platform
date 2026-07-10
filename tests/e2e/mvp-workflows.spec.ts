@@ -59,6 +59,9 @@ test.describe.serial("MVP end-to-end workflows", () => {
 
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByTestId("customer-account")).toBeVisible();
+    await page.reload();
+    await expect(page).toHaveURL(/\/account$/);
+    await expect(page.getByTestId("customer-account")).toBeVisible();
 
     await page.goto("/products");
     await expect(page.getByTestId("product-list")).toBeVisible();
@@ -84,6 +87,11 @@ test.describe.serial("MVP end-to-end workflows", () => {
     await page.goto("/account/orders");
     await expect(page.getByTestId("customer-orders-heading")).toBeVisible();
     await expect(page.getByTestId("customer-order-row").filter({ hasText: createdOrderId })).toHaveCount(1);
+
+    await page.goto("/logout");
+    await expect(page).toHaveURL(/\/login$/);
+    await page.goto("/account");
+    await expect(page).toHaveURL(/\/login$/);
   });
 
   test("admin can view the created order, update status, and export CSV", async ({ page }) => {

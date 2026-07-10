@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
+import {
+  createCustomerSessionPayload,
+  CUSTOMER_SESSION_COOKIE_NAME,
+  getCustomerSessionCookieOptions
+} from "@/lib/customer-session";
 import { verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/session-token";
@@ -31,25 +36,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=invalid", request.url), 303);
   }
 
-  const session = {
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-    role: "customer",
-    merchantId: null,
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
-  } as const;
+  const session = createCustomerSessionPayload(user);
   const token = await createSessionToken(session);
   const response = NextResponse.redirect(new URL("/account", request.url), 303);
+  const options = getCustomerSessionCookieOptions(session.expiresAt);
 
-  response.cookies.set(SESSION_COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: Math.floor((session.expiresAt - Date.now()) / 1000),
-    expires: new Date(session.expiresAt)
-  });
+  response.cookies.set(CUSTOMER_SESSION_COOKIE_NAME, token, options);
+  response.cookies.set(SESSION_COOKIE_NAME, token, options);
 
   return response;
 }
