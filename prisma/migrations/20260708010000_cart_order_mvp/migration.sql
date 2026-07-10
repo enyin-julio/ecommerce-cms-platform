@@ -1,0 +1,10 @@
+-- AlterEnum
+ALTER TYPE "OrderStatus" ADD VALUE IF NOT EXISTS 'pending';
+
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "stock" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "customerPhone" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "note" TEXT;
+ALTER TABLE "Order" ALTER COLUMN "status" SET DEFAULT 'pending';

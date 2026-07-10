@@ -1,0 +1,52 @@
+{
+  "name": "ecommerce-cms-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "npm run sqlite:generate && npm run sqlite:reset && npm run sqlite:seed && node --test --test-concurrency=1 tests/**/*.test.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "lint": "eslint .",
+    "db:validate": "prisma validate",
+    "db:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "create:admin": "node scripts/create-admin.mjs",
+    "check:smoke-note": "node scripts/smoke-note.mjs",
+    "check:prod": "npm run db:validate && npm run db:generate && npm run lint && npm run build && npm run test:e2e",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:migrate": "prisma migrate dev",
+    "sqlite:generate": "prisma generate --schema prisma/schema.sqlite.prisma",
+    "sqlite:push": "prisma db push --schema prisma/schema.sqlite.prisma",
+    "sqlite:reset": "node scripts/sqlite-reset.mjs",
+    "sqlite:seed": "prisma db seed --schema prisma/schema.sqlite.prisma",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.1.0",
+    "@vercel/blob": "^2.6.1",
+    "clsx": "^2.1.1",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.1.0",
+    "postcss": "^8.4.49",
+    "prisma": "^6.1.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
+  }
+}

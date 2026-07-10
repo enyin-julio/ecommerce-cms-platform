@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("SQLITE_DATABASE_URL")
+}
+
+model User {
+  id                   String               @id @default(cuid())
+  merchantId           String?
+  merchant             Merchant?            @relation(fields: [merchantId], references: [id])
+  name                 String
+  email                String               @unique
+  passwordHash         String
+  phone                String?
+  address              String?
+  role                 String               @default("customer")
+  carts                Cart[]
+  orders               Order[]
+  orderStatusHistories OrderStatusHistory[]
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  @@index([merchantId])
+}
+
+model Merchant {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  contactEmail String
+  users        User[]
+  products     Product[]
+  categories   Category[]
+  pages        Page[]
+  media        Media[]
+  carts        Cart[]
+  orders       Order[]
+  siteSetting  SiteSetting?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Category {
+  id         String    @id @default(cuid())
+  merchantId String
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
+  name       String
+  slug       String
+  products   Product[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([merchantId, slug])
+  @@index([merchantId])
+}
+
+model Product {
+  id               String          @id @default(cuid())
+  merchantId       String
+  merchant         Merchant        @relation(fields: [merchantId], references: [id])
+  categoryId       String?
+  category         Category?       @relation(fields: [categoryId], references: [id])
+  name             String
+  sku              String          @unique
+  slug             String
+  shortDescription String
+  description      String
+  price            Decimal
+  originalPrice    Decimal?
+  stock            Int             @default(0)
+  imageUrl         String?
+  isPublished      Boolean         @default(false)
+  seoTitle         String?
+  seoDescription   String?
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+  stockMovements   StockMovement[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([merchantId, slug])
+  @@index([merchantId, isPublished])
+  @@index([categoryId])
+}
+
+model Page {
+  id             String   @id @default(cuid())
+  merchantId     String
+  merchant       Merchant @relation(fields: [merchantId], references: [id])
+  title          String
+  slug           String
+  type           String   @default("content")
+  heroTitle      String?
+  heroSubtitle   String?
+  heroImageUrl   String?
+  contentBlocks  Json
+  seoTitle       String?
+  seoDescription String?
+  isPublished    Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([merchantId, slug])
+  @@index([merchantId, type, isPublished])
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  url        String
+  pathname   String?
+  provider   String   @default("local")
+  fileName   String?
+  altText    String?
+  mimeType   String?
+  size       Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([merchantId])
+}
+
+model Cart {
+  id         String     @id @default(cuid())
+  merchantId String
+  merchant   Merchant   @relation(fields: [merchantId], references: [id])
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id])
+  sessionId  String?
+  items      CartItem[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([merchantId])
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+
+  @@unique([cartId, productId])
+  @@index([productId])
+}
+
+model Order {
+  id              String               @id @default(cuid())
+  merchantId      String
+  merchant        Merchant             @relation(fields: [merchantId], references: [id])
+  userId          String?
+  user            User?                @relation(fields: [userId], references: [id])
+  status          String               @default("pending")
+  customerName    String
+  customerPhone   String
+  customerEmail   String
+  note            String?
+  shippingAddress Json?
+  subtotal        Decimal
+  total           Decimal
+  items           OrderItem[]
+  statusHistories OrderStatusHistory[]
+  stockMovements  StockMovement[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([merchantId, status])
+  @@index([userId])
+}
+
+model OrderStatusHistory {
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  previousStatus String?
+  nextStatus     String
+  changedById    String?
+  changedBy      User?    @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  note           String?
+  createdAt      DateTime @default(now())
+
+  @@index([orderId])
+  @@index([changedById])
+}
+
+model StockMovement {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  orderId   String?
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  quantity  Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([orderId])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  productName String
+  unitPrice   Decimal
+  quantity    Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model SiteSetting {
+  id             String   @id @default(cuid())
+  merchantId     String   @unique
+  merchant       Merchant @relation(fields: [merchantId], references: [id])
+  siteName       String
+  logoUrl        String?
+  primaryColor   String   @default("#2563eb")
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

@@ -1,0 +1,3 @@
+ALTER TABLE "Media" ADD COLUMN "pathname" TEXT;
+ALTER TABLE "Media" ADD COLUMN "provider" TEXT NOT NULL DEFAULT 'local';
+ALTER TABLE "Media" ADD COLUMN "fileName" TEXT;

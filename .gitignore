@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+build
+dist
+.env
+.env*.local
+*.log
+coverage
+prisma/dev.db
+playwright-report
+test-results
+public/uploads
+uploads
