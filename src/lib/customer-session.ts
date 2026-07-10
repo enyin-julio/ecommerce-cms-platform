@@ -37,12 +37,14 @@ export async function requireCustomerSession() {
 export async function setCustomerSessionCookie(session: CustomerSession) {
   const cookieStore = await cookies();
   const token = await createSessionToken(session);
+  const maxAge = Math.max(0, Math.floor((session.expiresAt - Date.now()) / 1000));
 
   cookieStore.set(CUSTOMER_SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
+    maxAge,
     expires: new Date(session.expiresAt)
   });
 }
@@ -50,5 +52,11 @@ export async function setCustomerSessionCookie(session: CustomerSession) {
 export async function clearCustomerSessionCookie() {
   const cookieStore = await cookies();
 
-  cookieStore.delete(CUSTOMER_SESSION_COOKIE_NAME);
+  cookieStore.set(CUSTOMER_SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0
+  });
 }
