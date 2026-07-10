@@ -10,17 +10,15 @@ export class VercelBlobStorageProvider implements StorageProvider {
   readonly provider = "vercel-blob" as const;
 
   async putObject(input: PutObjectInput): Promise<StoredObject> {
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      throw new Error("BLOB_READ_WRITE_TOKEN is required when STORAGE_PROVIDER=vercel-blob");
-    }
-
     const safeFilename = sanitizeStorageFilename(input.filename);
     const filename = `${Date.now()}-${crypto.randomUUID()}-${safeFilename}`;
     const pathname = `uploads/${filename}`;
     const blob = await put(pathname, Buffer.from(input.body), {
       access: "public",
       contentType: input.contentType,
-      token: process.env.BLOB_READ_WRITE_TOKEN
+      ...(process.env.BLOB_READ_WRITE_TOKEN
+        ? { token: process.env.BLOB_READ_WRITE_TOKEN }
+        : {})
     });
 
     return {

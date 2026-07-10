@@ -25,12 +25,13 @@ SESSION_SECRET="preview-only-random-secret-at-least-32-characters"
 NEXT_PUBLIC_SITE_URL="https://your-preview-domain.vercel.app"
 NODE_ENV="production"
 STORAGE_PROVIDER="vercel-blob"
-BLOB_READ_WRITE_TOKEN="preview_blob_read_write_token"
 ALLOW_PRODUCTION_SEED="false"
 ```
 
 `COOKIE_SECRET` is optional and only kept as a backward-compatible alias. Prefer
 `SESSION_SECRET`.
+For Blob uploads, prefer Vercel-managed OIDC variables such as `BLOB_STORE_ID`
+from the connected Blob store. `BLOB_READ_WRITE_TOKEN` is only a legacy fallback.
 
 ## Storefront
 

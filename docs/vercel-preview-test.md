@@ -36,7 +36,6 @@ SESSION_SECRET="preview-only-random-secret-at-least-32-characters"
 NEXT_PUBLIC_SITE_URL="https://your-preview-domain.vercel.app"
 NODE_ENV="production"
 STORAGE_PROVIDER="vercel-blob"
-BLOB_READ_WRITE_TOKEN="preview_blob_read_write_token"
 ALLOW_PRODUCTION_SEED="false"
 ```
 
@@ -47,7 +46,7 @@ COOKIE_SECRET=""
 NEXTAUTH_SECRET=""
 ```
 
-Use a different `SESSION_SECRET`, `DATABASE_URL`, and `BLOB_READ_WRITE_TOKEN`
+Use a different `SESSION_SECRET`, `DATABASE_URL`, and Blob store connection
 from production. Never point Preview at the production database.
 
 ## 3. PostgreSQL Provider Setup
@@ -68,12 +67,12 @@ Preview checklist:
 - Do not seed demo data into production. Demo seed is acceptable only for a
   disposable Preview database.
 
-## 4. Blob Token Setup
+## 4. Blob Store Setup
 
 1. In Vercel, open **Storage**.
 2. Create or connect a **Blob** store for Preview testing.
-3. Copy the read/write token.
-4. Add it to Preview env as `BLOB_READ_WRITE_TOKEN`.
+3. Connect it to the project for Preview.
+4. Confirm Vercel generated Blob OIDC variables such as `BLOB_STORE_ID`.
 5. Set `STORAGE_PROVIDER=vercel-blob`.
 6. Redeploy the Preview deployment after changing env values.
 

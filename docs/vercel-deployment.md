@@ -72,7 +72,6 @@ SESSION_SECRET="a-unique-random-secret-with-at-least-32-characters"
 NEXT_PUBLIC_SITE_URL="https://your-production-domain.com"
 NODE_ENV="production"
 STORAGE_PROVIDER="vercel-blob"
-BLOB_READ_WRITE_TOKEN=""
 ALLOW_PRODUCTION_SEED="false"
 ```
 
@@ -96,11 +95,12 @@ For production media uploads on Vercel, set:
 
 ```env
 STORAGE_PROVIDER="vercel-blob"
-BLOB_READ_WRITE_TOKEN="vercel_blob_read_write_token"
 ```
 
 Keep `STORAGE_PROVIDER="local"` only for local development. Vercel's runtime
 filesystem is ephemeral, so production uploads should use Vercel Blob.
+New Vercel Blob connections use OIDC and generate env vars such as
+`BLOB_STORE_ID`. `BLOB_READ_WRITE_TOKEN` is only a legacy fallback.
 
 ## 5. Production And Preview Differences
 
@@ -111,7 +111,7 @@ Production:
 - Production `SESSION_SECRET`
 - `NEXT_PUBLIC_SITE_URL=https://your-production-domain.com`
 - `STORAGE_PROVIDER=vercel-blob`
-- Production `BLOB_READ_WRITE_TOKEN`
+- Vercel Blob OIDC variables, for example `BLOB_STORE_ID`
 - `ALLOW_PRODUCTION_SEED=false`
 
 Preview:
@@ -221,7 +221,6 @@ Production on Vercel:
 
 ```env
 STORAGE_PROVIDER="vercel-blob"
-BLOB_READ_WRITE_TOKEN="vercel_blob_read_write_token"
 ```
 
 Setup steps:
@@ -229,9 +228,8 @@ Setup steps:
 1. In Vercel, open the project.
 2. Go to **Storage**.
 3. Create or connect a **Blob** store.
-4. Copy the read/write token.
-5. Add `BLOB_READ_WRITE_TOKEN` in **Settings > Environment Variables** for
-   Production and, if needed, Preview.
+4. Connect it to the project for Production and, if needed, Preview.
+5. Confirm Vercel generated Blob OIDC variables such as `BLOB_STORE_ID`.
 6. Set `STORAGE_PROVIDER=vercel-blob`.
 7. Redeploy the app.
 8. Upload a test JPG, PNG, or WebP from `/admin/media`.

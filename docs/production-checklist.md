@@ -14,7 +14,6 @@ SESSION_SECRET="a-unique-random-secret-with-at-least-32-characters"
 NEXT_PUBLIC_SITE_URL="https://your-production-domain.com"
 NODE_ENV="production"
 STORAGE_PROVIDER="vercel-blob"
-BLOB_READ_WRITE_TOKEN="vercel_blob_read_write_token"
 ALLOW_PRODUCTION_SEED="false"
 ```
 
@@ -27,7 +26,9 @@ Required variable notes:
 - `COOKIE_SECRET`: backward-compatible alias only. Prefer `SESSION_SECRET`.
 - `NEXT_PUBLIC_SITE_URL`: canonical public URL for the storefront.
 - `STORAGE_PROVIDER`: use `vercel-blob` for Vercel production media uploads.
-- `BLOB_READ_WRITE_TOKEN`: required when `STORAGE_PROVIDER=vercel-blob`.
+- Vercel Blob OIDC variables such as `BLOB_STORE_ID`: generated when the Blob
+  store is connected to the Vercel project. `BLOB_READ_WRITE_TOKEN` is only a
+  legacy fallback for older Blob setups.
 - `NODE_ENV`: must be `production`.
 
 Optional reserved variables:

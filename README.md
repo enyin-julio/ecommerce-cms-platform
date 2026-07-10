@@ -84,7 +84,7 @@ Production required variables:
 - `NEXT_PUBLIC_SITE_URL`: public site URL, for example `https://example.com`.
 - `NODE_ENV`: set to `production` in production.
 - `STORAGE_PROVIDER`: use `local` for development uploads, or `vercel-blob` for Vercel production media storage.
-- `BLOB_READ_WRITE_TOKEN`: required only when `STORAGE_PROVIDER=vercel-blob`.
+- `BLOB_READ_WRITE_TOKEN`: optional legacy fallback for older Vercel Blob setups. Prefer Vercel-managed OIDC env vars such as `BLOB_STORE_ID` when the Blob store is connected to the Vercel project.
 
 `COOKIE_SECRET` and `NEXTAUTH_SECRET` are supported only as backward-compatible
 aliases. Prefer `SESSION_SECRET` for new environments. Never use placeholder
@@ -355,9 +355,9 @@ Before creating a Vercel Preview deployment:
    - `NEXT_PUBLIC_SITE_URL`
    - `NODE_ENV=production`
    - `STORAGE_PROVIDER=vercel-blob`
-   - `BLOB_READ_WRITE_TOKEN`
+   - Vercel Blob OIDC variables, for example `BLOB_STORE_ID`
    - `ALLOW_PRODUCTION_SEED=false`
-7. Use a separate Preview PostgreSQL database and a separate Preview Blob token.
+7. Use a separate Preview PostgreSQL database and a separate Preview Blob store or connection.
 8. Run Preview migrations with `npm run db:migrate:deploy`.
 9. Wait for Vercel Preview deployment to finish.
 10. Run [Vercel Preview Smoke Test](docs/vercel-preview-smoke-test.md).
@@ -384,7 +384,7 @@ In Vercel:
    - `NEXT_PUBLIC_SITE_URL`
    - `NODE_ENV`
    - `STORAGE_PROVIDER`
-   - `BLOB_READ_WRITE_TOKEN`
+   - Vercel Blob OIDC variables, for example `BLOB_STORE_ID`
    - `ALLOW_PRODUCTION_SEED`
 4. Use separate values for Preview and Production.
 5. Redeploy after changing environment variables.
@@ -400,8 +400,9 @@ For Vercel Blob media storage:
 - Local development uses `STORAGE_PROVIDER=local` and writes files to
   `public/uploads`.
 - Production on Vercel should use `STORAGE_PROVIDER=vercel-blob`.
-- Create or connect a Blob store in Vercel, then set `BLOB_READ_WRITE_TOKEN`
-  in Project Settings.
+- Create or connect a Blob store in Vercel. New Vercel projects should use the
+  generated OIDC variables such as `BLOB_STORE_ID`; `BLOB_READ_WRITE_TOKEN` is
+  only a legacy fallback.
 - The admin media library accepts JPG, PNG, and WebP images up to 5MB.
 
 ## Troubleshooting
