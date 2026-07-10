@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getCurrentCustomerSession } from "@/lib/customer-session";
+import { getCurrentCustomerSession, setCustomerSessionCookie } from "@/lib/customer-session";
 import {
   addProductToCart,
   createOrderFromCart,
@@ -61,6 +61,10 @@ export async function checkoutAction(formData: FormData) {
     ...data,
     userId: session?.userId
   });
+
+  if (session) {
+    await setCustomerSessionCookie(session);
+  }
 
   revalidatePath("/cart");
   redirect(`/checkout/success?orderId=${order.id}`);
