@@ -3,12 +3,23 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
 import { formatCurrency } from "@/lib/format";
 import { requireCustomerSession } from "@/lib/customer-session";
+import { type PaymentStatus as PaymentStatusValue } from "@/lib/domain-types";
 import { getCustomerOrders } from "@/modules/customers/customer.repository";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "我的訂單"
+};
+
+const paymentStatusLabels: Record<PaymentStatusValue, string> = {
+  unpaid: "未付款",
+  pending: "付款處理中",
+  paid: "已付款",
+  failed: "付款失敗",
+  cancelled: "付款取消",
+  expired: "付款逾時",
+  refunded: "已退款"
 };
 
 export default async function AccountOrdersPage() {
@@ -31,7 +42,8 @@ export default async function AccountOrdersPage() {
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-5 py-3 font-semibold">訂單編號</th>
-                  <th className="px-5 py-3 font-semibold">狀態</th>
+                  <th className="px-5 py-3 font-semibold">訂單狀態</th>
+                  <th className="px-5 py-3 font-semibold">付款狀態</th>
                   <th className="px-5 py-3 font-semibold">品項</th>
                   <th className="px-5 py-3 font-semibold">總金額</th>
                   <th className="px-5 py-3 font-semibold">建立時間</th>
@@ -44,6 +56,9 @@ export default async function AccountOrdersPage() {
                     <tr key={order.id} data-testid="customer-order-row">
                       <td className="px-5 py-4 font-mono text-xs text-muted">{order.id}</td>
                       <td className="px-5 py-4 text-muted">{order.status}</td>
+                      <td className="px-5 py-4 text-muted" data-testid="customer-order-payment-status">
+                        {paymentStatusLabels[order.paymentStatus as PaymentStatusValue]}
+                      </td>
                       <td className="px-5 py-4 text-muted">{order.items.length}</td>
                       <td className="px-5 py-4 font-semibold text-ink">
                         {formatCurrency(order.total.toString())}
@@ -52,7 +67,10 @@ export default async function AccountOrdersPage() {
                         {order.createdAt.toLocaleDateString("zh-TW")}
                       </td>
                       <td className="px-5 py-4">
-                        <Link href={`/account/orders/${order.id}`} className="rounded-full border border-line px-3 py-2 text-xs font-semibold hover:border-brand-500">
+                        <Link
+                          href={`/account/orders/${order.id}`}
+                          className="rounded-full border border-line px-3 py-2 text-xs font-semibold hover:border-brand-500"
+                        >
                           查看
                         </Link>
                       </td>
@@ -60,7 +78,7 @@ export default async function AccountOrdersPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="px-5 py-10 text-center text-muted">
+                    <td colSpan={7} className="px-5 py-10 text-center text-muted">
                       目前沒有訂單。
                     </td>
                   </tr>

@@ -20,6 +20,8 @@ model User {
   carts                Cart[]
   orders               Order[]
   orderStatusHistories OrderStatusHistory[]
+  payments             Payment[]
+  paymentRefunds       PaymentRefund[]
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
 
@@ -159,6 +161,10 @@ model Order {
   userId          String?
   user            User?                @relation(fields: [userId], references: [id])
   status          String               @default("pending")
+  paymentStatus   String               @default("unpaid")
+  paymentProvider String?
+  paymentTransactionId String?
+  paidAt          DateTime?
   customerName    String
   customerPhone   String
   customerEmail   String
@@ -167,13 +173,87 @@ model Order {
   subtotal        Decimal
   total           Decimal
   items           OrderItem[]
+  payments        Payment[]
+  refunds         PaymentRefund[]
   statusHistories OrderStatusHistory[]
   stockMovements  StockMovement[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 
   @@index([merchantId, status])
+  @@index([merchantId, paymentStatus])
   @@index([userId])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  provider        String
+  status          String   @default("pending")
+  amount          Decimal
+  currency        String   @default("TWD")
+  merchantTradeNo String?  @unique
+  transactionId   String?
+  actionUrl       String?
+  formData        Json?
+  rawPayload      Json?
+  failureReason   String?
+  paidAt          DateTime?
+  webhookLogs     PaymentWebhookLog[]
+  refunds         PaymentRefund[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([provider, status])
+}
+
+model PaymentRefund {
+  id               String   @id @default(cuid())
+  paymentId        String
+  payment          Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  orderId          String
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status           String   @default("requested")
+  amount           Decimal
+  reason           String?
+  provider         String   @default("ecpay")
+  providerRefundId String?
+  requestPayload   Json?
+  responsePayload  Json?
+  requestedById    String?
+  requestedBy      User?    @relation(fields: [requestedById], references: [id], onDelete: SetNull)
+  processedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([orderId])
+  @@index([status])
+}
+
+model PaymentWebhookLog {
+  id                   String   @id @default(cuid())
+  paymentId            String?
+  payment              Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  provider             String
+  merchantTradeNo      String?
+  eventType            String
+  isValidSignature     Boolean  @default(false)
+  processingStatus     String   @default("received")
+  processingMessage    String?
+  requestPayload       Json
+  responsePayload      Json?
+  processedAt          DateTime?
+  createdAt            DateTime @default(now())
+
+  @@index([paymentId])
+  @@index([provider, merchantTradeNo])
+  @@index([provider, processingStatus])
 }
 
 model OrderStatusHistory {

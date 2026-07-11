@@ -1,6 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { OrderStatus, type OrderStatus as OrderStatusValue } from "@/lib/domain-types";
+import {
+  OrderStatus,
+  PaymentStatus,
+  type OrderStatus as OrderStatusValue,
+  type PaymentStatus as PaymentStatusValue
+} from "@/lib/domain-types";
 import { formatCurrency } from "@/lib/format";
 import { requireAdminSession } from "@/lib/rbac";
 import { getAdminOrders, type AdminOrderFilters } from "@/modules/orders/order.repository";
@@ -15,6 +20,7 @@ type AdminOrdersPageProps = {
   searchParams: Promise<{
     keyword?: string;
     status?: string;
+    paymentStatus?: string;
     dateFrom?: string;
     dateTo?: string;
     page?: string;
@@ -23,14 +29,25 @@ type AdminOrdersPageProps = {
 
 const orderStatuses: OrderStatusValue[] = [
   OrderStatus.pending,
+  OrderStatus.unpaid,
   OrderStatus.paid,
   OrderStatus.processing,
   OrderStatus.shipped,
   OrderStatus.cancelled
 ];
 
+const paymentStatuses: PaymentStatusValue[] = [
+  PaymentStatus.unpaid,
+  PaymentStatus.pending,
+  PaymentStatus.paid,
+  PaymentStatus.failed,
+  PaymentStatus.cancelled,
+  PaymentStatus.expired,
+  PaymentStatus.refunded
+];
+
 const statusLabels: Record<OrderStatusValue, string> = {
-  pending: "未付款",
+  pending: "待處理",
   unpaid: "未付款",
   paid: "已付款",
   processing: "處理中",
@@ -38,9 +55,20 @@ const statusLabels: Record<OrderStatusValue, string> = {
   cancelled: "已取消"
 };
 
+const paymentStatusLabels: Record<PaymentStatusValue, string> = {
+  unpaid: "未付款",
+  pending: "付款處理中",
+  paid: "已付款",
+  failed: "付款失敗",
+  cancelled: "付款取消",
+  expired: "付款逾時",
+  refunded: "已退款"
+};
+
 const exportFieldOptions = [
   ["orderId", "訂單編號"],
   ["status", "訂單狀態"],
+  ["paymentStatus", "付款狀態"],
   ["customerName", "客戶姓名"],
   ["customerPhone", "電話"],
   ["customerEmail", "Email"],
@@ -58,6 +86,7 @@ const exportFieldOptions = [
 const defaultExportFields = new Set([
   "orderId",
   "status",
+  "paymentStatus",
   "customerName",
   "customerPhone",
   "customerEmail",
@@ -80,13 +109,13 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
         <h2 className="mt-2 text-2xl font-bold text-ink">訂單管理</h2>
         <p className="mt-2 text-sm text-muted">
           {session.role === "admin"
-            ? "管理者可查看全部訂單。"
-            : "商家只能查看與自己商品相關的訂單。"}
+            ? "管理全平台訂單、付款狀態與出貨流程。"
+            : "管理與你商品相關的訂單與付款狀態。"}
         </p>
       </section>
 
       <form
-        className="grid gap-3 rounded-lg border border-line bg-white p-5 shadow-sm md:grid-cols-5"
+        className="grid gap-3 rounded-lg border border-line bg-white p-5 shadow-sm md:grid-cols-6"
         data-testid="admin-orders-filter-form"
       >
         <label className="block md:col-span-2">
@@ -101,47 +130,23 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
             data-testid="admin-orders-keyword"
           />
         </label>
-        <label className="block">
-          <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-            狀態
-          </span>
-          <select
-            name="status"
-            defaultValue={filters.status || ""}
-            className="mt-2 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500"
-            data-testid="admin-orders-status-filter"
-          >
-            <option value="">全部</option>
-            {orderStatuses.map((status) => (
-              <option key={status} value={status}>
-                {statusLabels[status]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-            起始日期
-          </span>
-          <input
-            name="dateFrom"
-            type="date"
-            defaultValue={filters.dateFrom || ""}
-            className="mt-2 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500"
-          />
-        </label>
-        <label className="block">
-          <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-            結束日期
-          </span>
-          <input
-            name="dateTo"
-            type="date"
-            defaultValue={filters.dateTo || ""}
-            className="mt-2 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500"
-          />
-        </label>
-        <div className="flex items-end gap-2 md:col-span-5">
+        <SelectField
+          label="訂單狀態"
+          name="status"
+          value={filters.status || ""}
+          options={orderStatuses.map((status) => [status, statusLabels[status]])}
+          testId="admin-orders-status-filter"
+        />
+        <SelectField
+          label="付款狀態"
+          name="paymentStatus"
+          value={filters.paymentStatus || ""}
+          options={paymentStatuses.map((status) => [status, paymentStatusLabels[status]])}
+          testId="admin-orders-payment-status-filter"
+        />
+        <DateField label="開始日期" name="dateFrom" value={filters.dateFrom || ""} />
+        <DateField label="結束日期" name="dateTo" value={filters.dateTo || ""} />
+        <div className="flex items-end gap-2 md:col-span-6">
           <button
             type="submit"
             className="rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700"
@@ -165,13 +170,14 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
       >
         <input type="hidden" name="keyword" value={filters.keyword || ""} />
         <input type="hidden" name="status" value={filters.status || ""} />
+        <input type="hidden" name="paymentStatus" value={filters.paymentStatus || ""} />
         <input type="hidden" name="dateFrom" value={filters.dateFrom || ""} />
         <input type="hidden" name="dateTo" value={filters.dateTo || ""} />
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
           <div>
             <p className="text-sm font-semibold text-ink">匯出 CSV</p>
             <p className="mt-1 text-sm text-muted">
-              匯出資料僅供對帳、出貨與營運分析，且只包含目前帳號有權限查看的訂單。
+              依目前篩選條件匯出目前帳號有權限查看的訂單資料，只供對帳、出貨與營運分析。
             </p>
           </div>
           <button
@@ -209,7 +215,8 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
                 <th className="px-5 py-3 font-semibold">商家</th>
                 <th className="px-5 py-3 font-semibold">品項</th>
                 <th className="px-5 py-3 font-semibold">總金額</th>
-                <th className="px-5 py-3 font-semibold">狀態</th>
+                <th className="px-5 py-3 font-semibold">訂單狀態</th>
+                <th className="px-5 py-3 font-semibold">付款狀態</th>
                 <th className="px-5 py-3 font-semibold">建立時間</th>
                 <th className="px-5 py-3 font-semibold">操作</th>
               </tr>
@@ -230,9 +237,10 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
                       {formatCurrency(order.total.toString())}
                     </td>
                     <td className="px-5 py-4">
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-muted">
-                        {statusLabels[order.status as OrderStatusValue]}
-                      </span>
+                      <StatusPill label={statusLabels[order.status as OrderStatusValue]} />
+                    </td>
+                    <td className="px-5 py-4" data-testid="admin-order-payment-status">
+                      <StatusPill label={paymentStatusLabels[order.paymentStatus as PaymentStatusValue]} />
                     </td>
                     <td className="px-5 py-4 text-muted">
                       {order.createdAt.toLocaleDateString("zh-TW")}
@@ -250,7 +258,7 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-5 py-10 text-center text-muted">
+                  <td colSpan={9} className="px-5 py-10 text-center text-muted">
                     目前沒有符合篩選條件的訂單。
                   </td>
                 </tr>
@@ -265,12 +273,7 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
           第 {result.page} / {result.totalPages} 頁，共 {result.totalCount} 筆
         </span>
         <div className="flex gap-2">
-          <PaginationLink
-            disabled={result.page <= 1}
-            label="上一頁"
-            params={params}
-            page={result.page - 1}
-          />
+          <PaginationLink disabled={result.page <= 1} label="上一頁" params={params} page={result.page - 1} />
           <PaginationLink
             disabled={result.page >= result.totalPages}
             label="下一頁"
@@ -287,15 +290,74 @@ function parseFilters(params: Awaited<AdminOrdersPageProps["searchParams"]>): Ad
   const parsedStatus = orderStatuses.includes(params.status as OrderStatusValue)
     ? (params.status as OrderStatusValue)
     : undefined;
+  const parsedPaymentStatus = paymentStatuses.includes(params.paymentStatus as PaymentStatusValue)
+    ? (params.paymentStatus as PaymentStatusValue)
+    : undefined;
 
   return {
     keyword: params.keyword || undefined,
     status: parsedStatus,
+    paymentStatus: parsedPaymentStatus,
     dateFrom: params.dateFrom || undefined,
     dateTo: params.dateTo || undefined,
     page: Number(params.page || 1),
     pageSize: 10
   };
+}
+
+function SelectField({
+  label,
+  name,
+  value,
+  options,
+  testId
+}: {
+  label: string;
+  name: string;
+  value: string;
+  options: Array<[string, string]>;
+  testId: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</span>
+      <select
+        name={name}
+        defaultValue={value}
+        className="mt-2 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500"
+        data-testid={testId}
+      >
+        <option value="">全部</option>
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function DateField({ label, name, value }: { label: string; name: string; value: string }) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</span>
+      <input
+        name={name}
+        type="date"
+        defaultValue={value}
+        className="mt-2 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500"
+      />
+    </label>
+  );
+}
+
+function StatusPill({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-muted">
+      {label}
+    </span>
+  );
 }
 
 function PaginationLink({

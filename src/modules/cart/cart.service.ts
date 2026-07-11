@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getPaymentProvider } from "@/modules/payment/payment-provider.factory";
 
 export const CART_COOKIE_NAME = "commerce_cart_id";
 
@@ -186,6 +187,7 @@ type CheckoutInput = {
   customerEmail: string;
   address: string;
   note?: string;
+  mockPaymentResult?: "success" | "failed";
 };
 
 export async function createOrderFromCart(input: CheckoutInput) {
@@ -211,6 +213,8 @@ export async function createOrderFromCart(input: CheckoutInput) {
         merchantId: cart.merchantId,
         userId: input.userId || null,
         status: "pending",
+        paymentStatus: "pending",
+        paymentProvider: process.env.PAYMENT_PROVIDER || "mock",
         customerName: input.customerName,
         customerPhone: input.customerPhone,
         customerEmail: input.customerEmail.toLowerCase(),
@@ -287,5 +291,100 @@ export async function createOrderFromCart(input: CheckoutInput) {
 
   await clearCartCookie();
 
-  return order;
+  const paymentProvider = getPaymentProvider();
+  const itemName = cart.items
+    .map((item) => `${item.product.name} x ${item.quantity}`)
+    .join("#")
+    .slice(0, 400);
+  const merchantTradeNo = createMerchantTradeNo();
+  const paymentResult = await paymentProvider.createPayment({
+    orderId: order.id,
+    amount: Number(order.total),
+    currency: "TWD",
+    customerEmail: input.customerEmail.toLowerCase(),
+    customerName: input.customerName,
+    itemName,
+    merchantTradeNo,
+    mode: input.mockPaymentResult === "failed" ? "failed" : "success"
+  });
+
+  if (paymentResult.status === "pending" && paymentResult.actionUrl && paymentResult.formFields) {
+    const payment = await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        userId: input.userId || null,
+        provider: paymentResult.provider,
+        status: "pending",
+        amount: order.total,
+        currency: "TWD",
+        merchantTradeNo,
+        actionUrl: paymentResult.actionUrl,
+        formData: paymentResult.formFields
+      }
+    });
+
+    return {
+      order,
+      paymentRedirectUrl: `/checkout/payment/${payment.id}`
+    };
+  }
+
+  const paidAt = paymentResult.status === "paid" ? paymentResult.paidAt || new Date() : null;
+  const nextOrderStatus = paymentResult.status === "paid" ? "paid" : order.status;
+  const nextPaymentStatus = paymentResult.status === "paid" ? "paid" : "failed";
+
+  const updatedOrder = await prisma.$transaction(async (tx) => {
+    await tx.payment.create({
+      data: {
+        orderId: order.id,
+        userId: input.userId || null,
+        provider: paymentResult.provider,
+        status: nextPaymentStatus,
+        amount: order.total,
+        currency: "TWD",
+        merchantTradeNo,
+        transactionId: paymentResult.providerReference,
+        failureReason: paymentResult.status === "failed" ? paymentResult.message || "Payment failed" : null,
+        paidAt
+      }
+    });
+
+    const updated = await tx.order.update({
+      where: {
+        id: order.id
+      },
+      data: {
+        status: nextOrderStatus,
+        paymentStatus: nextPaymentStatus,
+        paymentProvider: paymentResult.provider,
+        paymentTransactionId: paymentResult.providerReference,
+        paidAt
+      }
+    });
+
+    await tx.orderStatusHistory.create({
+      data: {
+        orderId: order.id,
+        previousStatus: order.status,
+        nextStatus: nextOrderStatus,
+        note:
+          paymentResult.status === "paid"
+            ? "Mock payment succeeded"
+            : "Mock payment failed"
+      }
+    });
+
+    return updated;
+  });
+
+  return {
+    order: updatedOrder
+  };
+}
+
+function createMerchantTradeNo() {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
+
+  return `EC${timestamp}${random}`.slice(0, 20);
 }

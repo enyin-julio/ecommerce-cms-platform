@@ -44,7 +44,8 @@ const checkoutSchema = z.object({
   customerPhone: z.string().min(1),
   customerEmail: z.string().email(),
   address: z.string().min(1),
-  note: z.string().optional()
+  note: z.string().optional(),
+  mockPaymentResult: z.enum(["success", "failed"]).default("success")
 });
 
 export async function checkoutAction(formData: FormData) {
@@ -54,10 +55,11 @@ export async function checkoutAction(formData: FormData) {
     customerPhone: formData.get("customerPhone"),
     customerEmail: formData.get("customerEmail"),
     address: formData.get("address"),
-    note: formData.get("note") || undefined
+    note: formData.get("note") || undefined,
+    mockPaymentResult: formData.get("mockPaymentResult") || "success"
   });
 
-  const order = await createOrderFromCart({
+  const result = await createOrderFromCart({
     ...data,
     userId: session?.userId
   });
@@ -67,5 +69,5 @@ export async function checkoutAction(formData: FormData) {
   }
 
   revalidatePath("/cart");
-  redirect(`/checkout/success?orderId=${order.id}`);
+  redirect(result.paymentRedirectUrl || `/checkout/success?orderId=${result.order.id}`);
 }

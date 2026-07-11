@@ -232,6 +232,8 @@ async function main() {
       merchantId: merchant.id,
       userId: customer.id,
       status: "pending",
+      paymentStatus: "unpaid",
+      paymentProvider: "mock",
       customerName: "Demo Customer",
       customerPhone: "0912345678",
       customerEmail: "customer@example.com",

@@ -1,19 +1,36 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { OrderStatus, type OrderStatus as OrderStatusValue } from "@/lib/domain-types";
+import {
+  OrderStatus,
+  PaymentStatus,
+  type OrderStatus as OrderStatusValue,
+  type PaymentStatus as PaymentStatusValue
+} from "@/lib/domain-types";
 import { getCurrentAdminSession } from "@/lib/session";
 import { getAdminOrdersForExport } from "@/modules/orders/order.repository";
 
 const exportStatuses: OrderStatusValue[] = [
   OrderStatus.pending,
+  OrderStatus.unpaid,
   OrderStatus.paid,
   OrderStatus.processing,
   OrderStatus.shipped,
   OrderStatus.cancelled
 ];
 
+const exportPaymentStatuses: PaymentStatusValue[] = [
+  PaymentStatus.unpaid,
+  PaymentStatus.pending,
+  PaymentStatus.paid,
+  PaymentStatus.failed,
+  PaymentStatus.cancelled,
+  PaymentStatus.expired,
+  PaymentStatus.refunded
+];
+
 const exportFieldMap = {
   orderId: "訂單編號",
   status: "訂單狀態",
+  paymentStatus: "付款狀態",
   customerName: "客戶姓名",
   customerPhone: "電話",
   customerEmail: "Email",
@@ -33,6 +50,7 @@ type ExportField = keyof typeof exportFieldMap;
 const defaultFields: ExportField[] = [
   "orderId",
   "status",
+  "paymentStatus",
   "customerName",
   "customerPhone",
   "customerEmail",
@@ -60,10 +78,15 @@ export async function GET(request: NextRequest) {
   const status = exportStatuses.includes(statusParam as OrderStatusValue)
     ? (statusParam as OrderStatusValue)
     : undefined;
+  const paymentStatusParam = searchParams.get("paymentStatus");
+  const paymentStatus = exportPaymentStatuses.includes(paymentStatusParam as PaymentStatusValue)
+    ? (paymentStatusParam as PaymentStatusValue)
+    : undefined;
   const fields = parseFields(searchParams.getAll("fields"));
   const orders = await getAdminOrdersForExport(session, {
     keyword: searchParams.get("keyword") || undefined,
     status,
+    paymentStatus,
     dateFrom: searchParams.get("dateFrom") || undefined,
     dateTo: searchParams.get("dateTo") || undefined
   });
@@ -113,6 +136,8 @@ function buildCsvRow(
         return order.id;
       case "status":
         return order.status;
+      case "paymentStatus":
+        return order.paymentStatus;
       case "customerName":
         return order.customerName;
       case "customerPhone":

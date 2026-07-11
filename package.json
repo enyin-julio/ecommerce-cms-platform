@@ -19,6 +19,7 @@
     "create:merchant": "node scripts/create-merchant.mjs",
     "check:smoke-note": "node scripts/smoke-note.mjs",
     "check:prod": "npm run db:validate && npm run db:generate && npm run lint && npm run build && npm run test:e2e",
+    "test:payment:checkmac": "node scripts/verify-ecpay-checkmac.mjs",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "prisma migrate dev",

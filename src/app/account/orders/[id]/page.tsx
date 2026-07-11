@@ -4,12 +4,35 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/public/site-header";
 import { formatCurrency } from "@/lib/format";
 import { requireCustomerSession } from "@/lib/customer-session";
+import {
+  type OrderStatus as OrderStatusValue,
+  type PaymentStatus as PaymentStatusValue
+} from "@/lib/domain-types";
 import { getCustomerOrderById } from "@/modules/customers/customer.repository";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "訂單詳情"
+};
+
+const orderStatusLabels: Record<OrderStatusValue, string> = {
+  pending: "待處理",
+  unpaid: "未付款",
+  paid: "已付款",
+  processing: "處理中",
+  shipped: "已出貨",
+  cancelled: "已取消"
+};
+
+const paymentStatusLabels: Record<PaymentStatusValue, string> = {
+  unpaid: "未付款",
+  pending: "付款處理中",
+  paid: "已付款",
+  failed: "付款失敗",
+  cancelled: "付款取消",
+  expired: "付款逾時",
+  refunded: "已退款"
 };
 
 type AccountOrderDetailPageProps = {
@@ -35,9 +58,14 @@ export default async function AccountOrderDetailPage({ params }: AccountOrderDet
           返回訂單列表
         </Link>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">訂單詳情</h1>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-4">
           <InfoCard label="訂單編號" value={order.id} />
-          <InfoCard label="訂單狀態" value={order.status} />
+          <InfoCard label="訂單狀態" value={orderStatusLabels[order.status as OrderStatusValue]} />
+          <InfoCard
+            label="付款狀態"
+            value={paymentStatusLabels[order.paymentStatus as PaymentStatusValue]}
+            testId="customer-order-detail-payment-status"
+          />
           <InfoCard label="建立時間" value={order.createdAt.toLocaleString("zh-TW")} />
         </div>
         <OrderItems order={order} />
@@ -46,11 +74,21 @@ export default async function AccountOrderDetailPage({ params }: AccountOrderDet
   );
 }
 
-function InfoCard({ label, value }: { label: string; value: string }) {
+function InfoCard({
+  label,
+  value,
+  testId
+}: {
+  label: string;
+  value: string;
+  testId?: string;
+}) {
   return (
     <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
       <p className="text-sm text-muted">{label}</p>
-      <p className="mt-2 break-all font-semibold text-ink">{value}</p>
+      <p className="mt-2 break-all font-semibold text-ink" data-testid={testId}>
+        {value}
+      </p>
     </div>
   );
 }

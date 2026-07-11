@@ -14,6 +14,7 @@ test.describe.serial("MVP end-to-end workflows", () => {
   let customerEmail: string;
   let customerPassword: string;
   let createdOrderId: string;
+  let failedOrderId: string;
 
   test("admin can log in to the dashboard", async ({ page }) => {
     await page.goto("/admin/login");
@@ -35,7 +36,7 @@ test.describe.serial("MVP end-to-end workflows", () => {
     await expect(page.getByTestId("admin-dashboard")).toBeVisible();
   });
 
-  test("customer can register, log in, buy a product, and see the order", async ({ page }) => {
+  test("customer can register, log in, buy a product, and see the paid order", async ({ page }) => {
     const suffix = Date.now();
     customerEmail = `e2e-customer-${suffix}@example.com`;
     customerPassword = "Customer123!";
@@ -65,7 +66,10 @@ test.describe.serial("MVP end-to-end workflows", () => {
 
     await page.goto("/products");
     await expect(page.getByTestId("product-list")).toBeVisible();
-    await page.getByTestId("product-card").filter({ hasText: "Daily Canvas Tote" }).click();
+    await Promise.all([
+      page.waitForURL(/\/products\/daily-canvas-tote$/),
+      page.getByTestId("product-card").filter({ hasText: "Daily Canvas Tote" }).click()
+    ]);
 
     await expect(page.getByTestId("product-detail-title")).toBeVisible();
     await page.getByTestId("product-quantity").fill("1");
@@ -80,18 +84,53 @@ test.describe.serial("MVP end-to-end workflows", () => {
     await page.getByTestId("place-order").click();
 
     await expect(page).toHaveURL(/\/checkout\/success/);
+    await expect(page.getByTestId("checkout-success-payment-status")).toContainText("paid");
     const orderIdText = await page.getByTestId("checkout-success-order-id").innerText();
     createdOrderId = orderIdText.replace("Order ID:", "").trim();
     expect(createdOrderId).not.toEqual("");
 
     await page.goto("/account/orders");
     await expect(page.getByTestId("customer-orders-heading")).toBeVisible();
-    await expect(page.getByTestId("customer-order-row").filter({ hasText: createdOrderId })).toHaveCount(1);
+    const orderRow = page.getByTestId("customer-order-row").filter({ hasText: createdOrderId });
+    await expect(orderRow).toHaveCount(1);
+    await expect(orderRow).toContainText("已付款");
 
     await page.goto("/logout");
     await expect(page).toHaveURL(/\/login$/);
     await page.goto("/account");
     await expect(page).toHaveURL(/\/login$/);
+  });
+
+  test("customer can create a mock failed payment order and see payment status", async ({ page }) => {
+    expect(customerEmail).toBeTruthy();
+
+    await page.goto("/login");
+    await page.getByTestId("customer-login-email").fill(customerEmail);
+    await page.getByTestId("customer-login-password").fill(customerPassword);
+    await page.getByTestId("customer-login-submit").click();
+    await expect(page.getByTestId("customer-account")).toBeVisible();
+
+    await page.goto("/products/daily-canvas-tote");
+    await page.getByTestId("product-quantity").fill("1");
+    await page.getByTestId("add-to-cart").click();
+
+    await expect(page).toHaveURL(/\/cart$/);
+    await page.getByTestId("cart-checkout-link").click();
+
+    await expect(page.getByTestId("checkout-form")).toBeVisible();
+    await page.getByTestId("checkout-mock-payment-result").selectOption("failed");
+    await page.getByTestId("place-order").click();
+
+    await expect(page).toHaveURL(/\/checkout\/success/);
+    await expect(page.getByTestId("checkout-success-payment-status")).toContainText("failed");
+    const orderIdText = await page.getByTestId("checkout-success-order-id").innerText();
+    failedOrderId = orderIdText.replace("Order ID:", "").trim();
+    expect(failedOrderId).not.toEqual("");
+
+    await page.goto("/account/orders");
+    const failedOrderRow = page.getByTestId("customer-order-row").filter({ hasText: failedOrderId });
+    await expect(failedOrderRow).toHaveCount(1);
+    await expect(failedOrderRow).toContainText("付款失敗");
   });
 
   test("admin can view the created order, update status, and export CSV", async ({ page }) => {
@@ -103,10 +142,11 @@ test.describe.serial("MVP end-to-end workflows", () => {
     await page.getByTestId("admin-login-submit").click();
     await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-    await page.goto(`/admin/orders?keyword=${encodeURIComponent(createdOrderId)}`);
+    await page.goto(`/admin/orders?keyword=${encodeURIComponent(createdOrderId)}&paymentStatus=paid`);
     await expect(page.getByTestId("admin-orders-page")).toBeVisible();
     const targetOrderRow = page.getByTestId("admin-order-row").filter({ hasText: createdOrderId });
     await expect(targetOrderRow).toHaveCount(1);
+    await expect(targetOrderRow).toContainText("已付款");
     await Promise.all([
       page.waitForURL(new RegExp(`/admin/orders/${createdOrderId}$`)),
       targetOrderRow.getByTestId("admin-order-detail-link").click()
@@ -114,14 +154,15 @@ test.describe.serial("MVP end-to-end workflows", () => {
 
     await expect(page.getByTestId("admin-order-detail-page")).toBeVisible();
     await expect(page.getByTestId("admin-order-id")).toContainText(createdOrderId);
-    await page.getByTestId("admin-order-status-select").selectOption("paid");
+    await expect(page.getByTestId("admin-order-payment-status")).toContainText("已付款");
+    await page.getByTestId("admin-order-status-select").selectOption("processing");
     await page.getByTestId("admin-order-status-note").fill("E2E 狀態更新");
     await page.getByTestId("admin-order-status-submit").click();
 
-    await expect(page.getByTestId("admin-order-current-status")).toContainText("已付款");
+    await expect(page.getByTestId("admin-order-current-status")).toContainText("處理中");
     await expect(page.getByTestId("admin-order-status-history")).toContainText("E2E 狀態更新");
 
-    await page.goto(`/admin/orders?keyword=${encodeURIComponent(createdOrderId)}`);
+    await page.goto(`/admin/orders?keyword=${encodeURIComponent(createdOrderId)}&paymentStatus=paid`);
     const [download] = await Promise.all([
       page.waitForEvent("download"),
       page.getByTestId("admin-orders-export-submit").click()

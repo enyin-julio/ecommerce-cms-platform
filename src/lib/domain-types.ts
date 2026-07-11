@@ -25,3 +25,14 @@ export const OrderStatus = {
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
+export const PaymentStatus = {
+  unpaid: "unpaid",
+  pending: "pending",
+  paid: "paid",
+  failed: "failed",
+  cancelled: "cancelled",
+  expired: "expired",
+  refunded: "refunded"
+} as const;
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];

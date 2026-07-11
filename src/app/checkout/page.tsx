@@ -35,16 +35,37 @@ export default async function CheckoutPage() {
           >
             <TextField label="姓名" name="customerName" defaultValue={customer?.name || ""} required />
             <TextField label="電話" name="customerPhone" defaultValue={customer?.phone || ""} required />
-            <TextField label="Email" name="customerEmail" type="email" defaultValue={customer?.email || ""} required />
+            <TextField
+              label="Email"
+              name="customerEmail"
+              type="email"
+              defaultValue={customer?.email || ""}
+              required
+            />
             <TextArea label="地址" name="address" defaultValue={customer?.address || ""} required />
             <TextArea label="備註" name="note" />
+            <label className="block">
+              <span className="text-sm font-medium text-ink">測試付款結果</span>
+              <select
+                name="mockPaymentResult"
+                defaultValue="success"
+                className="mt-2 w-full rounded-lg border border-line px-4 py-3 outline-none focus:border-brand-500"
+                data-testid="checkout-mock-payment-result"
+              >
+                <option value="success">付款成功</option>
+                <option value="failed">付款失敗</option>
+              </select>
+              <span className="mt-2 block text-xs text-muted">
+                目前為 mock 測試模式，不會串接真實金流，也不會收集信用卡資料。
+              </span>
+            </label>
             <button
               type="submit"
               disabled={!cart || cart.items.length === 0}
               className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               data-testid="place-order"
             >
-              送出訂單
+              建立訂單並測試付款
             </button>
           </form>
         </div>

@@ -6,6 +6,7 @@ import { OrderStatus } from "@/lib/domain-types";
 import { prisma } from "@/lib/prisma";
 import { assertMerchantAccess, denyAccess, requireAdminSession } from "@/lib/rbac";
 import { canTransitionOrderStatus } from "@/modules/orders/order-status.service";
+import { createEcpaySandboxRefund } from "@/modules/payment/ecpay-refund.service";
 
 const statusSchema = z.object({
   status: z.nativeEnum(OrderStatus),
@@ -93,4 +94,40 @@ export async function updateOrderStatusAction(orderId: string, formData: FormDat
 
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${order.id}`);
+}
+
+const refundSchema = z.object({
+  amount: z.coerce.number().positive(),
+  reason: z.string().max(300).optional()
+});
+
+export async function createOrderRefundAction(orderId: string, formData: FormData) {
+  const session = await requireAdminSession();
+  const data = refundSchema.parse({
+    amount: formData.get("amount"),
+    reason: formData.get("reason") || undefined
+  });
+  const order = await prisma.order.findUnique({
+    where: {
+      id: orderId
+    },
+    select: {
+      merchantId: true
+    }
+  });
+
+  if (!order) {
+    denyAccess();
+  }
+
+  assertMerchantAccess(session, order.merchantId);
+
+  await createEcpaySandboxRefund({
+    orderId,
+    amount: data.amount,
+    reason: data.reason,
+    requestedById: session.userId
+  });
+
+  revalidatePath(`/admin/orders/${orderId}`);
 }

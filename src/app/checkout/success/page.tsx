@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Order success"
@@ -16,6 +17,16 @@ export default async function CheckoutSuccessPage({
   searchParams
 }: CheckoutSuccessPageProps) {
   const params = await searchParams;
+  const order = params.orderId
+    ? await prisma.order.findUnique({
+        where: {
+          id: params.orderId
+        },
+        select: {
+          paymentStatus: true
+        }
+      })
+    : null;
 
   return (
     <main className="min-h-screen bg-white">
@@ -30,6 +41,11 @@ export default async function CheckoutSuccessPage({
         {params.orderId ? (
           <p className="mt-4 text-sm text-muted" data-testid="checkout-success-order-id">
             Order ID: {params.orderId}
+          </p>
+        ) : null}
+        {order ? (
+          <p className="mt-3 text-sm font-semibold text-ink" data-testid="checkout-success-payment-status">
+            Payment status: {order.paymentStatus}
           </p>
         ) : null}
         <Link

@@ -109,7 +109,10 @@ test.describe.serial("Admin management and RBAC E2E", () => {
     await expect(row).toHaveCount(1);
     await expect(row).toContainText("已上架");
 
-    await row.getByTestId("admin-product-edit-link").click();
+    await Promise.all([
+      page.waitForURL(new RegExp(`/admin/products/.+/edit$`)),
+      row.getByTestId("admin-product-edit-link").click()
+    ]);
     await expect(page.getByTestId("admin-product-form")).toBeVisible();
     await page.getByTestId("admin-product-name").fill(updatedName);
     await page.getByTestId("admin-product-price").fill("1090");
@@ -147,7 +150,10 @@ test.describe.serial("Admin management and RBAC E2E", () => {
     await expect(row).toHaveCount(1);
     await expect(row).toContainText("未發布");
 
-    await row.getByTestId("admin-page-edit-link").click();
+    await Promise.all([
+      page.waitForURL(new RegExp(`/admin/pages/.+/edit$`)),
+      row.getByTestId("admin-page-edit-link").click()
+    ]);
     await expect(page.getByTestId("admin-page-form")).toBeVisible();
     await page.getByTestId("admin-page-title").fill(updatedTitle);
     await page.getByTestId("admin-page-isPublished").check();

@@ -1,8 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import type { OrderStatus as OrderStatusValue } from "@/lib/domain-types";
-import { updateOrderStatusAction } from "@/app/admin/(protected)/orders/actions";
+import {
+  type OrderStatus as OrderStatusValue,
+  type PaymentStatus as PaymentStatusValue
+} from "@/lib/domain-types";
+import {
+  createOrderRefundAction,
+  updateOrderStatusAction
+} from "@/app/admin/(protected)/orders/actions";
 import { formatCurrency } from "@/lib/format";
 import { requireAdminSession } from "@/lib/rbac";
 import { getAdminOrderById } from "@/modules/orders/order.repository";
@@ -18,12 +25,22 @@ export const metadata: Metadata = {
 };
 
 const statusLabels: Record<OrderStatusValue, string> = {
-  pending: "未付款",
+  pending: "待處理",
   unpaid: "未付款",
   paid: "已付款",
   processing: "處理中",
   shipped: "已出貨",
   cancelled: "已取消"
+};
+
+const paymentStatusLabels: Record<PaymentStatusValue, string> = {
+  unpaid: "未付款",
+  pending: "付款處理中",
+  paid: "已付款",
+  failed: "付款失敗",
+  cancelled: "付款取消",
+  expired: "付款逾時",
+  refunded: "已退款"
 };
 
 type AdminOrderDetailPageProps = {
@@ -43,8 +60,15 @@ export default async function AdminOrderDetailPage({
     notFound();
   }
 
+  const latestPayment = order.payments[0];
   const shippingAddress = order.shippingAddress as { address?: string; phone?: string } | null;
   const orderStatus = order.status as OrderStatusValue;
+  const paymentStatus = (latestPayment?.status || order.paymentStatus) as PaymentStatusValue;
+  const canRequestRefund =
+    order.paymentStatus === "paid" &&
+    latestPayment?.provider === "ecpay" &&
+    process.env.PAYMENT_MODE !== "production" &&
+    process.env.ENABLE_ECPAY_PRODUCTION !== "true";
   const nextStatuses = getAllowedNextOrderStatuses(orderStatus);
   const statusHint = getOrderStatusHint(orderStatus);
 
@@ -60,26 +84,46 @@ export default async function AdminOrderDetailPage({
         </p>
       </div>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-muted">客戶資料</p>
-          <h3 className="mt-2 font-semibold text-ink">{order.customerName}</h3>
+      <section className="grid gap-4 lg:grid-cols-4">
+        <InfoCard title="客戶資料">
+          <h3 className="font-semibold text-ink">{order.customerName}</h3>
           <p className="mt-1 text-sm text-muted">{order.customerEmail}</p>
           <p className="mt-1 text-sm text-muted">{order.customerPhone}</p>
-        </div>
-        <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-muted">配送資訊</p>
-          <p className="mt-2 text-sm leading-6 text-ink">
-            {shippingAddress?.address || "未填寫地址"}
+        </InfoCard>
+        <InfoCard title="配送資訊">
+          <p className="text-sm leading-6 text-ink">
+            {shippingAddress?.address || "尚未填寫配送地址"}
           </p>
           {order.note ? <p className="mt-2 text-sm text-muted">備註：{order.note}</p> : null}
-        </div>
+        </InfoCard>
+        <InfoCard title="付款資訊">
+          <p className="text-lg font-bold text-ink" data-testid="admin-order-payment-status">
+            {paymentStatusLabels[paymentStatus]}
+          </p>
+          <p className="mt-2 text-sm text-muted">
+            Provider: {latestPayment?.provider || order.paymentProvider || "尚無付款服務"}
+          </p>
+          <p className="mt-1 break-all text-xs text-muted">
+            MerchantTradeNo: {latestPayment?.merchantTradeNo || "尚無交易訂單編號"}
+          </p>
+          <p className="mt-1 break-all text-xs text-muted">
+            Transaction: {latestPayment?.transactionId || order.paymentTransactionId || "尚無交易編號"}
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            Paid at:{" "}
+            {latestPayment?.paidAt
+              ? latestPayment.paidAt.toLocaleString("zh-TW")
+              : order.paidAt
+                ? order.paidAt.toLocaleString("zh-TW")
+                : "尚未付款"}
+          </p>
+        </InfoCard>
         <form
           action={updateOrderStatusAction.bind(null, order.id)}
           className="rounded-lg border border-line bg-white p-5 shadow-sm"
           data-testid="admin-order-status-form"
         >
-          <p className="text-sm font-medium text-muted">目前狀態</p>
+          <p className="text-sm font-medium text-muted">訂單狀態</p>
           <p className="mt-2 text-lg font-bold text-ink" data-testid="admin-order-current-status">
             {statusLabels[orderStatus]}
           </p>
@@ -91,7 +135,7 @@ export default async function AdminOrderDetailPage({
             className="mt-3 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500 disabled:bg-slate-100"
             data-testid="admin-order-status-select"
           >
-            {nextStatuses.length === 0 ? <option value="">沒有可變更的狀態</option> : null}
+            {nextStatuses.length === 0 ? <option value="">沒有可用操作</option> : null}
             {nextStatuses.map((status) => (
               <option key={status} value={status}>
                 {statusLabels[status]}
@@ -152,6 +196,65 @@ export default async function AdminOrderDetailPage({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
+        <form
+          action={createOrderRefundAction.bind(null, order.id)}
+          className="rounded-lg border border-line bg-white p-6 shadow-sm"
+          data-testid="admin-order-refund-form"
+        >
+          <h3 className="text-lg font-semibold text-ink">退款作業 Sandbox</h3>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            目前只允許 Sandbox 記錄退款請求，不會呼叫正式綠界退款 API。
+          </p>
+          <input
+            name="amount"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="退款金額"
+            disabled={!canRequestRefund}
+            className="mt-4 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500 disabled:bg-slate-100"
+            data-testid="admin-order-refund-amount"
+          />
+          <input
+            name="reason"
+            placeholder="退款原因"
+            disabled={!canRequestRefund}
+            className="mt-3 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500 disabled:bg-slate-100"
+            data-testid="admin-order-refund-reason"
+          />
+          <button
+            type="submit"
+            disabled={!canRequestRefund}
+            className="mt-3 rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            data-testid="admin-order-refund-submit"
+          >
+            建立退款請求
+          </button>
+        </form>
+
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-ink">退款紀錄</h3>
+          <div className="mt-4 space-y-3" data-testid="admin-order-refund-history">
+            {order.refunds.length > 0 ? (
+              order.refunds.map((refund) => (
+                <div key={refund.id} className="rounded-lg bg-slate-50 p-4 text-sm">
+                  <p className="font-semibold text-ink">
+                    {refund.status} · {formatCurrency(refund.amount.toString())}
+                  </p>
+                  <p className="mt-1 text-muted">
+                    {refund.requestedBy?.email || "系統"} · {refund.createdAt.toLocaleString("zh-TW")}
+                  </p>
+                  {refund.reason ? <p className="mt-2 text-muted">{refund.reason}</p> : null}
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted">尚無退款紀錄。</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
           <h3 className="text-lg font-semibold text-ink">狀態異動紀錄</h3>
           <div className="mt-4 space-y-3" data-testid="admin-order-status-history">
@@ -172,7 +275,7 @@ export default async function AdminOrderDetailPage({
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted">目前沒有狀態異動紀錄。</p>
+              <p className="text-sm text-muted">尚無狀態異動紀錄。</p>
             )}
           </div>
         </div>
@@ -193,11 +296,20 @@ export default async function AdminOrderDetailPage({
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted">目前沒有庫存異動紀錄。</p>
+              <p className="text-sm text-muted">尚無庫存異動紀錄。</p>
             )}
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function InfoCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
+      <p className="mb-2 text-sm font-medium text-muted">{title}</p>
+      {children}
     </div>
   );
 }

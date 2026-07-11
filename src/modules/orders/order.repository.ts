@@ -1,11 +1,12 @@
 import { Prisma } from "@prisma/client";
-import type { OrderStatus } from "@/lib/domain-types";
+import type { OrderStatus, PaymentStatus } from "@/lib/domain-types";
 import { prisma } from "@/lib/prisma";
 import type { AdminSession } from "@/lib/session-token";
 
 export type AdminOrderFilters = {
   keyword?: string;
   status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
   dateFrom?: string;
   dateTo?: string;
   page?: number;
@@ -21,6 +22,10 @@ export function buildAdminOrderWhere(session: AdminSession, filters: AdminOrderF
 
   if (filters.status) {
     where.status = filters.status;
+  }
+
+  if (filters.paymentStatus) {
+    where.paymentStatus = filters.paymentStatus;
   }
 
   if (filters.keyword?.trim()) {
@@ -80,7 +85,7 @@ export async function getAdminOrders(session: AdminSession, filters: AdminOrderF
 
 export async function getAdminOrdersForExport(
   session: AdminSession,
-  filters: Pick<AdminOrderFilters, "keyword" | "status" | "dateFrom" | "dateTo">
+  filters: Pick<AdminOrderFilters, "keyword" | "status" | "paymentStatus" | "dateFrom" | "dateTo">
 ) {
   return prisma.order.findMany({
     where: buildAdminOrderWhere(session, filters),
@@ -124,6 +129,19 @@ export async function getAdminOrderById(id: string, session: AdminSession) {
       stockMovements: {
         include: {
           product: true
+        },
+        orderBy: {
+          createdAt: "desc"
+        }
+      },
+      payments: {
+        orderBy: {
+          createdAt: "desc"
+        }
+      },
+      refunds: {
+        include: {
+          requestedBy: true
         },
         orderBy: {
           createdAt: "desc"
