@@ -7,6 +7,9 @@ const commands = [
   "npx prisma db seed"
 ];
 
+const e2ePort = process.env.E2E_PORT || "3000";
+const e2eBaseUrl = process.env.E2E_BASE_URL || `http://localhost:${e2ePort}`;
+
 export default async function globalSetup() {
   ensureE2ESessionSecret();
 
@@ -22,7 +25,7 @@ export default async function globalSetup() {
     return;
   }
 
-  const server = spawn("node", ["node_modules/next/dist/bin/next", "dev"], {
+  const server = spawn("node", ["node_modules/next/dist/bin/next", "dev", "-p", e2ePort], {
     cwd: process.cwd(),
     env: process.env,
     stdio: "inherit",
@@ -38,7 +41,7 @@ export default async function globalSetup() {
 
 async function isServerReady() {
   try {
-    const response = await fetch("http://localhost:3000");
+    const response = await fetch(e2eBaseUrl);
     return response.ok || response.status < 500;
   } catch {
     return false;
@@ -75,7 +78,7 @@ async function waitForServer(server: ChildProcess) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  throw new Error("Timed out waiting for Next.js dev server at http://localhost:3000");
+  throw new Error(`Timed out waiting for Next.js dev server at ${e2eBaseUrl}`);
 }
 
 function stopServer(server: ChildProcess) {
