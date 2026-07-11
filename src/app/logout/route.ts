@@ -2,8 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   CUSTOMER_SESSION_COOKIE_PATHS,
   CUSTOMER_SESSION_COOKIE_NAME,
-  CUSTOMER_SESSION_COOKIE_DOMAINS,
   getExpiredCustomerSessionCookieOptions,
+  getCustomerSessionCookieDomainsForPath,
   LEGACY_CUSTOMER_SESSION_COOKIE_NAMES,
   serializeExpiredCustomerSessionCookie
 } from "@/lib/customer-session";
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   for (const path of CUSTOMER_SESSION_COOKIE_PATHS) {
     for (const name of cookieNamesToClear) {
-      for (const domain of CUSTOMER_SESSION_COOKIE_DOMAINS) {
+      for (const domain of getCustomerSessionCookieDomainsForPath(path)) {
         response.headers.append(
           "Set-Cookie",
           serializeExpiredCustomerSessionCookie(name, path, domain)
