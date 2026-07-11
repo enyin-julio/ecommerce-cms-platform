@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { customerRegisterAction } from "@/app/(customer)/auth-actions";
 import { SiteHeader } from "@/components/public/site-header";
 
 export const metadata: Metadata = {
@@ -21,7 +20,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
       <SiteHeader />
       <section className="mx-auto max-w-md px-4 py-16 sm:px-6">
         <form
-          action={customerRegisterAction}
+          action="/api/customer/register"
+          method="post"
           className="rounded-lg border border-line bg-white p-8 shadow-sm"
           data-testid="customer-register-form"
         >
