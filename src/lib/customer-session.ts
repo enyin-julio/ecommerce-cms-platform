@@ -16,7 +16,15 @@ export type CustomerSession = AdminSession & {
 };
 
 const CUSTOMER_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
-export const CUSTOMER_SESSION_COOKIE_PATHS = ["/", "/account", "/account/orders"];
+export const CUSTOMER_SESSION_COOKIE_PATHS = [
+  "/",
+  "/account",
+  "/account/",
+  "/account/orders",
+  "/account/orders/",
+  "/login",
+  "/register"
+];
 
 export function getCustomerSessionCookieOptions(expiresAt: number) {
   return {
