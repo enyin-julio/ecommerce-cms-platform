@@ -24,7 +24,7 @@ export async function setAdminSessionCookie(session: AdminSession) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    expires: new Date(session.expiresAt)
+    maxAge: Math.max(0, Math.floor((session.expiresAt - Date.now()) / 1000))
   });
 }
 

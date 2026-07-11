@@ -23,8 +23,7 @@ export function getCustomerSessionCookieOptions(expiresAt: number) {
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: Math.max(0, Math.floor((expiresAt - Date.now()) / 1000)),
-    expires: new Date(expiresAt)
+    maxAge: Math.max(0, Math.floor((expiresAt - Date.now()) / 1000))
   };
 }
 
