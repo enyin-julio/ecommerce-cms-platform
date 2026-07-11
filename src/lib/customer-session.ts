@@ -56,6 +56,24 @@ export function serializeExpiredCustomerSessionCookie(name: string, path: string
   return attributes.join("; ");
 }
 
+export function serializeCustomerSessionCookie(name: string, value: string, expiresAt: number) {
+  const maxAge = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+  const attributes = [
+    `${name}=${value}`,
+    "Path=/",
+    `Expires=${new Date(expiresAt).toUTCString()}`,
+    `Max-Age=${maxAge}`,
+    "HttpOnly",
+    "SameSite=Lax"
+  ];
+
+  if (process.env.NODE_ENV === "production") {
+    attributes.push("Secure");
+  }
+
+  return attributes.join("; ");
+}
+
 export function createCustomerSessionPayload(user: {
   id: string;
   email: string;

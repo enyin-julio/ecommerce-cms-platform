@@ -4,8 +4,8 @@ import {
   CUSTOMER_SESSION_COOKIE_NAME,
   CUSTOMER_SESSION_COOKIE_PATHS,
   createCustomerSessionPayload,
-  getCustomerSessionCookieOptions,
   LEGACY_CUSTOMER_SESSION_COOKIE_NAMES,
+  serializeCustomerSessionCookie,
   serializeExpiredCustomerSessionCookie
 } from "@/lib/customer-session";
 import { hashPassword } from "@/lib/password";
@@ -60,7 +60,6 @@ export async function POST(request: NextRequest) {
   const session = createCustomerSessionPayload(user);
   const token = await createSessionToken(session);
   const response = NextResponse.redirect(new URL("/account", request.url), 303);
-  const options = getCustomerSessionCookieOptions(session.expiresAt);
 
   for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
     response.headers.append("Set-Cookie", serializeExpiredCustomerSessionCookie(name, "/"));
@@ -78,8 +77,14 @@ export async function POST(request: NextRequest) {
       serializeExpiredCustomerSessionCookie(SESSION_COOKIE_NAME, path)
     );
   }
-  response.cookies.set(CUSTOMER_SESSION_COOKIE_NAME, token, options);
-  response.cookies.set(SESSION_COOKIE_NAME, token, options);
+  response.headers.append(
+    "Set-Cookie",
+    serializeCustomerSessionCookie(CUSTOMER_SESSION_COOKIE_NAME, token, session.expiresAt)
+  );
+  response.headers.append(
+    "Set-Cookie",
+    serializeCustomerSessionCookie(SESSION_COOKIE_NAME, token, session.expiresAt)
+  );
 
   return response;
 }
