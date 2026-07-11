@@ -108,9 +108,7 @@ export async function setCustomerSessionCookie(session: CustomerSession) {
   const options = getCustomerSessionCookieOptions(session.expiresAt);
 
   cookieStore.set(CUSTOMER_SESSION_COOKIE_NAME, token, options);
-  cookieStore.set(SESSION_COOKIE_NAME, token, {
-    ...options
-  });
+  cookieStore.set(SESSION_COOKIE_NAME, token, options);
 }
 
 export async function clearCustomerSessionCookie() {

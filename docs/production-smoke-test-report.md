@@ -36,8 +36,7 @@
 
 ## 修正項目
 
-- 已將 customer 登入頁由 `/api/customer/login` route handler 改為既有 `customerLoginAction` server action。
-- 修正目的：讓 customer 登入與註冊使用同一套 session cookie 寫入流程，降低 production route handler 與 server action 寫 cookie 行為不一致造成的掉登入風險。
+- customer 登入頁維持 `/api/customer/login` route handler，該 route 會在登入成功時清除舊的 path-specific customer cookie。
 - 已將 admin / customer 登入 cookie 改為使用 `maxAge` 為主，不在登入 cookie 上寫入絕對 `expires`。
 - 修正目的：降低 production server 與瀏覽器時鐘差造成 cookie 被立即視為過期的風險。
 - 修正後本機 E2E 已驗證 customer register、login、reload、checkout、account orders、logout 流程通過。
