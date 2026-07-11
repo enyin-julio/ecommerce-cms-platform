@@ -25,7 +25,13 @@ export const CUSTOMER_SESSION_COOKIE_PATHS = [
   "/login",
   "/register"
 ];
-export const CUSTOMER_SESSION_COOKIE_DOMAINS = [undefined, "aih.tw", ".aih.tw"] as const;
+export const CUSTOMER_SESSION_COOKIE_DOMAINS = [
+  undefined,
+  "www.aih.tw",
+  ".www.aih.tw",
+  "aih.tw",
+  ".aih.tw"
+] as const;
 
 export function getCustomerSessionCookieOptions(expiresAt: number) {
   return {
