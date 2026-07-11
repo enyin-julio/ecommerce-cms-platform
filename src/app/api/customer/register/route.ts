@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import {
   CUSTOMER_SESSION_COOKIE_NAME,
+  CUSTOMER_SESSION_COOKIE_DOMAINS,
   CUSTOMER_SESSION_COOKIE_PATHS,
   createCustomerSessionPayload,
   LEGACY_CUSTOMER_SESSION_COOKIE_NAMES,
@@ -60,22 +61,21 @@ export async function POST(request: NextRequest) {
   const session = createCustomerSessionPayload(user);
   const token = await createSessionToken(session);
   const response = NextResponse.redirect(new URL("/account", request.url), 303);
+  const cookieNamesToClear = [
+    CUSTOMER_SESSION_COOKIE_NAME,
+    SESSION_COOKIE_NAME,
+    ...LEGACY_CUSTOMER_SESSION_COOKIE_NAMES
+  ];
 
-  for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
-    response.headers.append("Set-Cookie", serializeExpiredCustomerSessionCookie(name, "/"));
-  }
-  for (const path of CUSTOMER_SESSION_COOKIE_PATHS.filter((cookiePath) => cookiePath !== "/")) {
-    response.headers.append(
-      "Set-Cookie",
-      serializeExpiredCustomerSessionCookie(CUSTOMER_SESSION_COOKIE_NAME, path)
-    );
-    for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
-      response.headers.append("Set-Cookie", serializeExpiredCustomerSessionCookie(name, path));
+  for (const path of CUSTOMER_SESSION_COOKIE_PATHS) {
+    for (const name of cookieNamesToClear) {
+      for (const domain of CUSTOMER_SESSION_COOKIE_DOMAINS) {
+        response.headers.append(
+          "Set-Cookie",
+          serializeExpiredCustomerSessionCookie(name, path, domain)
+        );
+      }
     }
-    response.headers.append(
-      "Set-Cookie",
-      serializeExpiredCustomerSessionCookie(SESSION_COOKIE_NAME, path)
-    );
   }
   response.headers.append(
     "Set-Cookie",

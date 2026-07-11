@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   CUSTOMER_SESSION_COOKIE_PATHS,
   CUSTOMER_SESSION_COOKIE_NAME,
+  CUSTOMER_SESSION_COOKIE_DOMAINS,
   getExpiredCustomerSessionCookieOptions,
   LEGACY_CUSTOMER_SESSION_COOKIE_NAMES,
   serializeExpiredCustomerSessionCookie
@@ -11,6 +12,11 @@ import { SESSION_COOKIE_NAME } from "@/lib/session-token";
 export async function GET(request: NextRequest) {
   const response = NextResponse.redirect(new URL("/login", request.url), 303);
   const rootOptions = getExpiredCustomerSessionCookieOptions();
+  const cookieNamesToClear = [
+    CUSTOMER_SESSION_COOKIE_NAME,
+    SESSION_COOKIE_NAME,
+    ...LEGACY_CUSTOMER_SESSION_COOKIE_NAMES
+  ];
 
   response.cookies.set(CUSTOMER_SESSION_COOKIE_NAME, "", rootOptions);
   for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
@@ -18,18 +24,15 @@ export async function GET(request: NextRequest) {
   }
   response.cookies.set(SESSION_COOKIE_NAME, "", rootOptions);
 
-  for (const path of CUSTOMER_SESSION_COOKIE_PATHS.filter((cookiePath) => cookiePath !== "/")) {
-    response.headers.append(
-      "Set-Cookie",
-      serializeExpiredCustomerSessionCookie(CUSTOMER_SESSION_COOKIE_NAME, path)
-    );
-    for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
-      response.headers.append("Set-Cookie", serializeExpiredCustomerSessionCookie(name, path));
+  for (const path of CUSTOMER_SESSION_COOKIE_PATHS) {
+    for (const name of cookieNamesToClear) {
+      for (const domain of CUSTOMER_SESSION_COOKIE_DOMAINS) {
+        response.headers.append(
+          "Set-Cookie",
+          serializeExpiredCustomerSessionCookie(name, path, domain)
+        );
+      }
     }
-    response.headers.append(
-      "Set-Cookie",
-      serializeExpiredCustomerSessionCookie(SESSION_COOKIE_NAME, path)
-    );
   }
 
   return response;

@@ -25,6 +25,7 @@ export const CUSTOMER_SESSION_COOKIE_PATHS = [
   "/login",
   "/register"
 ];
+export const CUSTOMER_SESSION_COOKIE_DOMAINS = [undefined, "aih.tw", ".aih.tw"] as const;
 
 export function getCustomerSessionCookieOptions(expiresAt: number) {
   return {
@@ -47,7 +48,11 @@ export function getExpiredCustomerSessionCookieOptions(path = "/") {
   };
 }
 
-export function serializeExpiredCustomerSessionCookie(name: string, path: string) {
+export function serializeExpiredCustomerSessionCookie(
+  name: string,
+  path: string,
+  domain?: string
+) {
   const attributes = [
     `${name}=`,
     `Path=${path}`,
@@ -56,6 +61,10 @@ export function serializeExpiredCustomerSessionCookie(name: string, path: string
     "HttpOnly",
     "SameSite=Lax"
   ];
+
+  if (domain) {
+    attributes.push(`Domain=${domain}`);
+  }
 
   if (process.env.NODE_ENV === "production") {
     attributes.push("Secure");
