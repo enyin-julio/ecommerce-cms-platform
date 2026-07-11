@@ -8,7 +8,8 @@ import {
   type AdminSession
 } from "@/lib/session-token";
 
-export const CUSTOMER_SESSION_COOKIE_NAME = "commerce_customer_session";
+export const CUSTOMER_SESSION_COOKIE_NAME = "commerce_customer_session_v2";
+export const LEGACY_CUSTOMER_SESSION_COOKIE_NAMES = ["commerce_customer_session"];
 
 export type CustomerSession = AdminSession & {
   role: "customer";
@@ -76,6 +77,9 @@ export async function getCurrentCustomer() {
   const cookieStore = await cookies();
   const tokens = [
     ...cookieStore.getAll(CUSTOMER_SESSION_COOKIE_NAME).map((cookie) => cookie.value),
+    ...LEGACY_CUSTOMER_SESSION_COOKIE_NAMES.flatMap((name) =>
+      cookieStore.getAll(name).map((cookie) => cookie.value)
+    ),
     ...cookieStore.getAll(SESSION_COOKIE_NAME).map((cookie) => cookie.value)
   ];
 
@@ -116,5 +120,8 @@ export async function clearCustomerSessionCookie() {
   const options = getExpiredCustomerSessionCookieOptions();
 
   cookieStore.set(CUSTOMER_SESSION_COOKIE_NAME, "", options);
+  for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
+    cookieStore.set(name, "", options);
+  }
   cookieStore.set(SESSION_COOKIE_NAME, "", options);
 }

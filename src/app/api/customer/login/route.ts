@@ -5,6 +5,7 @@ import {
   createCustomerSessionPayload,
   CUSTOMER_SESSION_COOKIE_NAME,
   getCustomerSessionCookieOptions,
+  LEGACY_CUSTOMER_SESSION_COOKIE_NAMES,
   serializeExpiredCustomerSessionCookie
 } from "@/lib/customer-session";
 import { verifyPassword } from "@/lib/password";
@@ -45,11 +46,17 @@ export async function POST(request: NextRequest) {
 
   response.cookies.set(CUSTOMER_SESSION_COOKIE_NAME, token, options);
   response.cookies.set(SESSION_COOKIE_NAME, token, options);
+  for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
+    response.headers.append("Set-Cookie", serializeExpiredCustomerSessionCookie(name, "/"));
+  }
   for (const path of CUSTOMER_SESSION_COOKIE_PATHS.filter((cookiePath) => cookiePath !== "/")) {
     response.headers.append(
       "Set-Cookie",
       serializeExpiredCustomerSessionCookie(CUSTOMER_SESSION_COOKIE_NAME, path)
     );
+    for (const name of LEGACY_CUSTOMER_SESSION_COOKIE_NAMES) {
+      response.headers.append("Set-Cookie", serializeExpiredCustomerSessionCookie(name, path));
+    }
     response.headers.append(
       "Set-Cookie",
       serializeExpiredCustomerSessionCookie(SESSION_COOKIE_NAME, path)
