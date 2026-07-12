@@ -28,6 +28,16 @@ function buildEcpayCheckMacValue(params, hashKey, hashIv) {
   return createHash("sha256").update(encoded).digest("hex").toUpperCase();
 }
 
+function verifyEcpayCheckMacValue(params, hashKey, hashIv) {
+  const received = String(params.CheckMacValue || "").toUpperCase();
+
+  if (!received) {
+    return false;
+  }
+
+  return buildEcpayCheckMacValue(params, hashKey, hashIv) === received;
+}
+
 function encryptEcpayData(data, hashKey, hashIv) {
   const encoded = encodeURIComponent(JSON.stringify(data));
   const cipher = createCipheriv("aes-128-cbc", Buffer.from(hashKey, "utf8"), Buffer.from(hashIv, "utf8"));
@@ -96,6 +106,22 @@ assert.equal(
   ),
   paymentCallbackMac
 );
+assert.equal(
+  verifyEcpayCheckMacValue(
+    { ...paymentCallback, CheckMacValue: paymentCallbackMac },
+    "pwFHCqoQZGmho4w6",
+    "EkRm7iFT261dpevs"
+  ),
+  true
+);
+assert.equal(
+  verifyEcpayCheckMacValue(
+    { ...paymentCallback, TradeAmt: "30001", CheckMacValue: paymentCallbackMac },
+    "pwFHCqoQZGmho4w6",
+    "EkRm7iFT261dpevs"
+  ),
+  false
+);
 
 const refundCallback = {
   PlatformID: "3002599",
@@ -124,6 +150,22 @@ assert.equal(
     "EkRm7iFT261dpevs"
   ),
   refundCallbackMac
+);
+assert.equal(
+  verifyEcpayCheckMacValue(
+    { ...refundCallback, CheckMacValue: refundCallbackMac },
+    "pwFHCqoQZGmho4w6",
+    "EkRm7iFT261dpevs"
+  ),
+  true
+);
+assert.equal(
+  verifyEcpayCheckMacValue(
+    { ...refundCallback, Data: JSON.stringify({ MerchantTradeNo: "tampered" }), CheckMacValue: refundCallbackMac },
+    "pwFHCqoQZGmho4w6",
+    "EkRm7iFT261dpevs"
+  ),
+  false
 );
 
 const cryptoExample = {

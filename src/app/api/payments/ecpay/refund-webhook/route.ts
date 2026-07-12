@@ -7,15 +7,29 @@ import { processEcpayRefundWebhook } from "@/modules/payment/ecpay-refund.servic
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const payload = (await request.json()) as Record<string, unknown>;
+  const payload = await parseRefundWebhookPayload(request);
 
   try {
     await processEcpayRefundWebhook(payload);
 
-    return NextResponse.json(buildRefundNotifyResponse(payload, 1, "成功"));
+    return NextResponse.json(buildRefundNotifyResponse(payload, 1, "OK"));
   } catch {
     return NextResponse.json(buildRefundNotifyResponse(payload, 0, "Error"), { status: 400 });
   }
+}
+
+async function parseRefundWebhookPayload(request: Request) {
+  const contentType = request.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return (await request.json()) as Record<string, unknown>;
+  }
+
+  const formData = await request.formData();
+
+  return Object.fromEntries(
+    Array.from(formData.entries()).map(([key, value]) => [key, String(value)])
+  );
 }
 
 function buildRefundNotifyResponse(

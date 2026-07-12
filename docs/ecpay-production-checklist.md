@@ -1,6 +1,10 @@
 # ECPay Production Checklist
 
-Production mode is intentionally disabled by default. Do not set production keys until this checklist is complete.
+Production mode is intentionally disabled by default. Do not enable production payments until this checklist is complete.
+
+## Current Blocker
+
+The project does not yet have an approved ECPay production merchant account. Keep `ENABLE_ECPAY_PRODUCTION=false` until the official production merchant account is approved and the production `ECPAY_MERCHANT_ID`, `ECPAY_HASH_KEY`, and `ECPAY_HASH_IV` are safely configured in Vercel production env.
 
 ## Required Production Env Names
 
@@ -8,7 +12,7 @@ Set these in the hosting provider production environment only:
 
 - `PAYMENT_PROVIDER=ecpay`
 - `PAYMENT_MODE=production`
-- `ENABLE_ECPAY_PRODUCTION=true`
+- `ENABLE_ECPAY_PRODUCTION=false`
 - `ECPAY_MERCHANT_ID`
 - `ECPAY_HASH_KEY`
 - `ECPAY_HASH_IV`
@@ -37,7 +41,7 @@ The application blocks production ECPay mode unless both are true:
 - `PAYMENT_MODE=production`
 - `ENABLE_ECPAY_PRODUCTION=true`
 
-Keep `ENABLE_ECPAY_PRODUCTION=false` until:
+Keep `ENABLE_ECPAY_PRODUCTION=false` in Vercel production env until:
 
 - Production database backup is complete.
 - Production env values are verified.
@@ -57,4 +61,4 @@ Keep `ENABLE_ECPAY_PRODUCTION=false` until:
 
 ## Still Not Enabled
 
-This codebase has a sandbox-only refund request flow. Production refund API calls must not be enabled until the refund API adapter, approval controls, and live ECPay callback decryption are implemented and verified.
+Production payments and refunds remain blocked while `ENABLE_ECPAY_PRODUCTION=false`. Only change it to `true` after final manual review, production URL confirmation, Vercel env confirmation, production smoke test, and finance reconciliation sign-off.
