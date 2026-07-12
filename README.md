@@ -30,6 +30,11 @@ Open:
 - Storefront: `http://localhost:3000`
 - Admin: `http://localhost:3000/admin/login`
 
+Production:
+
+- Storefront: `https://www.aih.tw`
+- Admin: `https://www.aih.tw/admin/login`
+
 ## Local Development Flow
 
 PostgreSQL local flow:
@@ -287,12 +292,32 @@ the browser tests. In CI it uses `prisma migrate deploy`; locally it uses
 - Read [Database Runbook](docs/database-runbook.md) before production migrations.
 - Read [Vercel Preview Deployment Test](docs/vercel-preview-test.md) before
   promoting a Preview deployment.
+- Read [Operation Manual](docs/operation-manual.md) for day-to-day admin and
+  merchant workflows.
+- Read [Troubleshooting](docs/troubleshooting.md) for Prisma, Vercel env,
+  Blob upload, session, build, and migration issues.
+- Use [Go-Live And Operations Checklist](docs/go-live-checklist.md) after
+  deployment or environment changes.
 - Run `npm run build` before deployment.
 - Run Prisma migrations against the production database before starting the app.
 - Set a strong `SESSION_SECRET`.
 - Do not commit `.env`, production customer data, or credentials.
 - Use HTTPS in production so secure cookies work correctly.
-- This MVP does not connect real payment or shipping providers.
+- Payment integration is limited to mock payments and ECPay Sandbox. ECPay
+  production is in waiting-for-production-account mode: production merchant
+  credentials are not configured, `ENABLE_ECPAY_PRODUCTION=false`, and real
+  payment capture is not enabled yet. See
+  [ECPay Production Final Review](docs/ecpay-production-final-review.md).
+- The latest production smoke test notes are in
+  [Production Smoke Test Report](docs/production-smoke-test-report.md).
+- Use [Payment Reconciliation Runbook](docs/payment-reconciliation.md) and
+  [Refund, Cancellation, and Expiry Design](docs/payment-refund-cancel-expiry-design.md)
+  before expanding payment operations.
+- Use [ECPay Production Checklist](docs/ecpay-production-checklist.md) before
+  setting any production payment env values.
+- Use [ECPay Production Manual Checklist](docs/ecpay-production-manual-checklist.md)
+  and [ECPay Sandbox Rehearsal](docs/ecpay-sandbox-rehearsal.md) before enabling
+  production payment mode.
 - Do not run `npm run build` while `npm run dev` is still running on Windows.
   Stop the dev server first to avoid stale `.next` cache issues.
 - Do not run `npx prisma db seed` against production unless the database is
@@ -423,6 +448,7 @@ npm run db:generate
 npm run db:migrate:deploy
 npm run db:seed
 npm run create:admin
+npm run create:merchant
 npm run check:smoke-note
 npm run check:prod
 ```
@@ -430,6 +456,26 @@ npm run check:prod
 `create:admin` creates or updates a production admin from `ADMIN_EMAIL`,
 `ADMIN_NAME`, and `ADMIN_PASSWORD`, or prompts interactively. Do not hardcode or
 commit admin passwords.
+
+`create:merchant` creates or updates a merchant user and merchant record through
+interactive prompts or environment variables. Do not commit merchant passwords.
+
+Routine production maintenance:
+
+```bash
+npm run db:validate
+npm run db:generate
+npm run build
+npm run test:e2e
+```
+
+Production migrations must use:
+
+```bash
+npm run db:migrate:deploy
+```
+
+Do not use `npx prisma migrate dev` against production.
 
 ## Demo Data Cleanup
 
@@ -468,3 +514,5 @@ change review.
 - Visual CMS block editor
 - Media deletion and advanced media organization
 - Redis cache backend and Elasticsearch product search backend
+- Custom production domain and final DNS hardening
+- Automated production backup scheduling
