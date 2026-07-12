@@ -13,11 +13,22 @@ export const metadata: Metadata = {
   title: "結帳"
 };
 
-export default async function CheckoutPage() {
+type CheckoutPageProps = {
+  searchParams?: Promise<{
+    error?: string;
+  }>;
+};
+
+export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
   const cart = await getCurrentCart();
   const session = await getCurrentCustomerSession();
   const customer = session ? await getCustomerById(session.userId) : null;
   const totals = cart ? calculateCartTotals(cart) : { subtotal: 0, total: 0 };
+  const params = await searchParams;
+  const errorMessage =
+    params?.error === "payment-not-enabled"
+      ? "正式付款尚未啟用。目前仍在等待綠界正式商店帳號審核，請先不要建立正式付款訂單。"
+      : null;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -28,6 +39,14 @@ export default async function CheckoutPage() {
             返回購物車
           </Link>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">結帳</h1>
+          {errorMessage ? (
+            <div
+              className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+              data-testid="checkout-error"
+            >
+              {errorMessage}
+            </div>
+          ) : null}
           <form
             action={checkoutAction}
             className="mt-6 space-y-5 rounded-lg border border-line bg-white p-6 shadow-sm"
@@ -56,7 +75,7 @@ export default async function CheckoutPage() {
                 <option value="failed">付款失敗</option>
               </select>
               <span className="mt-2 block text-xs text-muted">
-                目前為 mock 測試模式，不會串接真實金流，也不會收集信用卡資料。
+                目前為測試付款模式，不會串接真實金流，也不會收集信用卡資料。
               </span>
             </label>
             <button

@@ -62,6 +62,12 @@ export async function checkoutAction(formData: FormData) {
   const result = await createOrderFromCart({
     ...data,
     userId: session?.userId
+  }).catch((error: unknown) => {
+    if (error instanceof Error && error.message === "ECPay production is not enabled") {
+      redirect("/checkout?error=payment-not-enabled");
+    }
+
+    throw error;
   });
 
   if (session) {

@@ -197,6 +197,10 @@ export async function createOrderFromCart(input: CheckoutInput) {
     throw new Error("Cart is empty");
   }
 
+  if (isEcpayProductionBlocked()) {
+    throw new Error("ECPay production is not enabled");
+  }
+
   const unavailableItem = cart.items.find((item) => {
     return !item.product.isPublished || item.quantity < 1 || item.product.stock < item.quantity;
   });
@@ -387,4 +391,12 @@ function createMerchantTradeNo() {
   const random = crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
 
   return `EC${timestamp}${random}`.slice(0, 20);
+}
+
+function isEcpayProductionBlocked() {
+  return (
+    process.env.PAYMENT_PROVIDER === "ecpay" &&
+    process.env.PAYMENT_MODE === "production" &&
+    process.env.ENABLE_ECPAY_PRODUCTION !== "true"
+  );
 }
