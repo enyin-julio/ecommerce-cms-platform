@@ -15,7 +15,7 @@ export function getEcpayRuntimeConfig(options: { requireReturnUrl?: boolean } = 
   const mode = process.env.PAYMENT_MODE === "production" ? "production" : "sandbox";
 
   if (mode === "production" && process.env.ENABLE_ECPAY_PRODUCTION !== "true") {
-    throw new Error("ECPay production mode is disabled. Set ENABLE_ECPAY_PRODUCTION=true only after production readiness approval.");
+    throw new Error("ECPay production is not enabled");
   }
 
   const merchantId = process.env.ECPAY_MERCHANT_ID || "";
@@ -55,7 +55,7 @@ export function assertEcpayProductionAllowed(operation: string) {
   const mode = process.env.PAYMENT_MODE === "production" ? "production" : "sandbox";
 
   if (mode === "production" && process.env.ENABLE_ECPAY_PRODUCTION !== "true") {
-    throw new Error(`${operation} is blocked because ENABLE_ECPAY_PRODUCTION is not true`);
+    throw new Error(`${operation} is blocked because ECPay production is not enabled`);
   }
 }
 

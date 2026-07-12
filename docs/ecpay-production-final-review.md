@@ -22,6 +22,27 @@ ENABLE_ECPAY_PRODUCTION=false
 
 The non-secret production URL and mode variables may remain prepared in Vercel, but live collection must stay blocked.
 
+## Waiting For Production Merchant Account Mode
+
+The current operating mode is waiting for an official ECPay production merchant account.
+
+Current status:
+
+- Official ECPay production merchant account: not yet available.
+- Production `ECPAY_MERCHANT_ID`: not yet filled.
+- Production `ECPAY_HASH_KEY`: not yet filled.
+- Production `ECPAY_HASH_IV`: not yet filled.
+- Production collection: prohibited.
+- Production guard: must block payment when `PAYMENT_MODE=production` and `ENABLE_ECPAY_PRODUCTION` is not `true`.
+
+The application should show this clear guard error when production mode is requested before approval:
+
+```text
+ECPay production is not enabled
+```
+
+Only after the official production merchant account is approved and the three production credentials are safely added to Vercel production env may this project enter production enablement review.
+
 ## Current Rule
 
 - `PAYMENT_PROVIDER=ecpay` may be configured for production.
