@@ -70,12 +70,15 @@ Validated in the sandbox database:
 - Cancelled callback produced `Payment.status=cancelled` and did not mark the order paid.
 - Expired callback produced `Payment.status=expired` and did not mark the order paid.
 - All inspected payment callbacks had `PaymentWebhookLog.isValidSignature=true`.
+- Admin refund request flow created a `PaymentRefund` through the normal application path.
+- Refund webhook updated `PaymentRefund.status=succeeded`.
+- Duplicate refund webhook created `PaymentWebhookLog.processingStatus=already_processed`.
+- All inspected refund callbacks had `PaymentWebhookLog.isValidSignature=true`.
 
 Still required before production:
 
 - Compare the successful sandbox transaction with ECPay back office by `MerchantTradeNo`, amount, and transaction number.
-- Create a refund through the normal admin/service path and reconcile `PaymentRefund` with ECPay refund records.
-- Confirm refund webhook duplicate handling in `PaymentWebhookLog`.
+- Reconcile the sandbox `PaymentRefund` with ECPay back office refund records.
 
 ## Exception Handling
 
