@@ -141,7 +141,8 @@ Manual sandbox validation still required:
 - ECPay Sandbox cashier accepted the payment request.
 - A valid payment success webhook POST to the public sandbox endpoint returned `1|OK`.
 - Replaying the same valid payment callback twice returned `1|OK` both times.
-- Database-level log inspection should still be performed before production to confirm `PaymentWebhookLog.processingStatus` values for the successful and duplicate callbacks.
+- Database-level log inspection confirmed one `paid` callback and two `already_processed` duplicate callbacks.
+- All inspected payment callback logs had `isValidSignature=true`.
 
 Resolved Preview blocker:
 
@@ -157,12 +158,13 @@ Code path reviewed:
 - `RtnMsg` is mapped to `failed`, `cancelled`, or `expired`.
 - `Order.paymentStatus` is updated to the resolved non-paid payment state.
 
-Manual sandbox validation still required:
+Public sandbox validation completed:
 
-- Cancel a sandbox payment and confirm the order does not become paid.
-- Simulate or capture a failed callback and confirm `Payment.status=failed`.
-- Simulate or capture an expired callback and confirm `Payment.status=expired`.
-- Confirm the admin order detail page shows the payment status.
+- Failed callback returned `1|OK` and produced `Payment.status=failed`, `Order.paymentStatus=failed`, `Order.status=pending`.
+- Cancelled callback returned `1|OK` and produced `Payment.status=cancelled`, `Order.paymentStatus=cancelled`, `Order.status=pending`.
+- Expired callback returned `1|OK` and produced `Payment.status=expired`, `Order.paymentStatus=expired`, `Order.status=pending`.
+- Database inspection confirmed all three non-success callbacks had `isValidSignature=true`.
+- Admin order detail display still requires a valid sandbox admin login session.
 
 ## Refund Flow
 
@@ -182,11 +184,16 @@ Code path reviewed:
 
 Manual sandbox validation still required:
 
-- Enable sandbox refund API only in a sandbox environment.
-- Request a refund for a paid sandbox order.
+- Request a refund for a paid sandbox order through the admin UI or service path.
 - Confirm ECPay refund response is recorded.
 - Confirm ECPay refund webhook updates the matching `PaymentRefund`.
 - Send the same refund webhook twice and confirm the second call is idempotent.
+
+Current refund blocker:
+
+- The public sandbox admin page requires a valid admin login, and the documented demo admin account did not authenticate.
+- A direct database write to create a refund row was intentionally not used, because it bypasses the application refund path.
+- Refund webhook success testing remains blocked until a valid sandbox admin account is available or a safe service-path refund setup is provided.
 
 ## Reconciliation Exercise
 
@@ -215,6 +222,9 @@ Manual reconciliation still required after one live sandbox transaction:
 - Duplicate paid webhook is designed to be idempotent.
 - Public sandbox webhook endpoint returned `1|OK` for a valid paid callback.
 - Public sandbox webhook endpoint returned `1|OK` for repeated valid paid callbacks.
+- Database inspection confirmed `PaymentWebhookLog.processingStatus=paid` for the first paid callback.
+- Database inspection confirmed `PaymentWebhookLog.processingStatus=already_processed` for duplicate paid callbacks.
+- Failed, cancelled, and expired callbacks were accepted by the public sandbox endpoint and did not mark orders as paid.
 - Refund webhook is designed to be idempotent for already succeeded refunds.
 
 ## Failed or Blocked Items
@@ -222,9 +232,8 @@ Manual reconciliation still required after one live sandbox transaction:
 - Live ECPay Sandbox cashier page was opened successfully on Vercel Preview and on the public sandbox project.
 - Preview inbound webhook delivery was blocked by Vercel Deployment Protection, but the dedicated public sandbox webhook endpoint is reachable.
 - Vercel Preview payment migrations were applied successfully.
-- Live failed, cancelled, and expired ECPay sandbox callbacks were not tested.
-- Live ECPay sandbox refund API and refund webhook were not tested.
-- Database-level `PaymentWebhookLog` inspection is still required for the public sandbox callbacks.
+- Live failed, cancelled, and expired ECPay sandbox callbacks were tested through valid signed callback payloads.
+- Live ECPay sandbox refund API and refund webhook were not tested because a refund request could not be created through a valid sandbox admin/service path.
 - ECPay back-office reconciliation is still required.
 
 ## Production Readiness Status
@@ -236,7 +245,7 @@ Do not set `ENABLE_ECPAY_PRODUCTION=true` until all of these are complete:
 - ECPay sandbox credentials are configured in a non-production public sandbox environment.
 - Public HTTPS `ReturnURL`, `OrderResultURL`, and `RefundNotifyURL` are configured for the public sandbox project.
 - One successful sandbox payment webhook is accepted by the public sandbox endpoint.
-- Duplicate payment webhook idempotency is verified at endpoint-response level.
+- Duplicate payment webhook idempotency is verified at endpoint-response and database-log level.
 - Database-level webhook log inspection is completed.
 - Failed, cancelled, and expired payment behavior is verified.
 - One sandbox refund and refund webhook are verified.

@@ -52,6 +52,31 @@ Use this table when comparing local records with ECPay back office exports:
 - [ ] Review all failed `PaymentWebhookLog` rows.
 - [ ] Escalate any amount mismatch before shipping or refunding.
 
+## Latest Sandbox Reconciliation Notes
+
+Last updated: 2026-07-12
+
+Public sandbox project:
+
+- `https://ecommerce-cms-ecpay-sandbox.vercel.app`
+- Branch: `ecpay-sandbox-validation`
+- Production mode remains disabled.
+
+Validated in the sandbox database:
+
+- Successful payment callback created one `PaymentWebhookLog.processingStatus=paid`.
+- Duplicate successful callbacks created `PaymentWebhookLog.processingStatus=already_processed`.
+- Failed callback produced `Payment.status=failed` and did not mark the order paid.
+- Cancelled callback produced `Payment.status=cancelled` and did not mark the order paid.
+- Expired callback produced `Payment.status=expired` and did not mark the order paid.
+- All inspected payment callbacks had `PaymentWebhookLog.isValidSignature=true`.
+
+Still required before production:
+
+- Compare the successful sandbox transaction with ECPay back office by `MerchantTradeNo`, amount, and transaction number.
+- Create a refund through the normal admin/service path and reconcile `PaymentRefund` with ECPay refund records.
+- Confirm refund webhook duplicate handling in `PaymentWebhookLog`.
+
 ## Exception Handling
 
 - If ECPay shows paid but this system is pending, check `PaymentWebhookLog` first.
