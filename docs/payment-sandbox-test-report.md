@@ -3,12 +3,20 @@
 Test date: 2026-07-12  
 Environment: local development against PostgreSQL on `localhost:5433`  
 Production mode: disabled. `ENABLE_ECPAY_PRODUCTION` remains `false`.
+Latest preview validation: Vercel Preview deployment for branch `ecpay-sandbox-validation`.
+Latest public sandbox validation: dedicated Vercel project `ecommerce-cms-ecpay-sandbox`.
 
 ## Summary
 
 This round completed code-level and local workflow validation for the ECPay Sandbox integration, but did not complete a live ECPay Sandbox payment in the ECPay hosted cashier page because the local environment does not currently provide sandbox credentials or a public HTTPS webhook URL.
 
 Automated local checkout coverage remains on the mock payment provider. This is intentional because normal E2E tests should not leave the app and depend on an external payment provider.
+
+An additional Vercel Preview validation was started after sandbox env values were added to the Preview environment. The preview deployment built successfully, storefront cart flow reached checkout, and pending payment creation succeeded after applying payment migrations to the connected Prisma Postgres database.
+
+The ECPay Sandbox cashier page opened successfully, which confirms the outgoing payment parameters and CheckMacValue were accepted by the sandbox cashier.
+
+The earlier Vercel Preview blocker was resolved by creating a dedicated public sandbox project. The public sandbox production deployment uses branch `ecpay-sandbox-validation`, production mode remains disabled, and `ENABLE_ECPAY_PRODUCTION` remains `false`.
 
 ## Environment Check
 
@@ -54,6 +62,28 @@ Automated E2E coverage with the mock provider passed:
 
 ECPay-specific live checkout was not completed in this round because sandbox env values and a public HTTPS callback URL were not available.
 
+Vercel Preview checkout attempt:
+
+- Preview branch: `ecpay-sandbox-validation`.
+- Preview deployment: `https://ecommerce-cms-platform-83rngcyik-enyin-julios-projects.vercel.app`.
+- Product list opened successfully.
+- Product detail opened successfully.
+- Add to cart succeeded.
+- Cart opened successfully.
+- Checkout page opened successfully.
+- `npx prisma migrate deploy` applied the pending payment migrations successfully.
+- Checkout submit created an order and pending ECPay `Payment`.
+- Payment page opened at `/checkout/payment/[paymentId]`.
+- ECPay Sandbox cashier opened at `https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5`.
+- ECPay Sandbox showed the credit-card test payment screen.
+- The payment stayed pending because the inbound webhook could not reach the protected Preview endpoint.
+
+Required next step before retrying hosted ECPay Sandbox checkout:
+
+- Public HTTPS sandbox project has been created: `https://ecommerce-cms-ecpay-sandbox.vercel.app`.
+- Production branch for the sandbox project is `ecpay-sandbox-validation`.
+- ECPay sandbox env URLs point to the public sandbox deployment.
+
 Expected ECPay Sandbox behavior to verify manually:
 
 - Order status remains `pending` after checkout creates the payment.
@@ -82,11 +112,11 @@ Code inspection confirms the ECPay provider prepares these fields:
 
 Manual sandbox validation still required:
 
-- Confirm `MerchantTradeNo` matches the local `Payment.merchantTradeNo`.
-- Confirm `TotalAmount` matches backend-calculated `Order.total`.
-- Confirm `ReturnURL` points to `/api/payments/ecpay/webhook`.
-- Confirm `OrderResultURL` points to the intended checkout result page.
-- Confirm the outgoing `CheckMacValue` matches the ECPay sandbox cashier acceptance.
+- `MerchantTradeNo` was shown by ECPay Sandbox for the public sandbox order.
+- `TotalAmount` matched the backend-calculated order total for the public sandbox order.
+- `ReturnURL` pointed to `/api/payments/ecpay/webhook` on the public sandbox domain.
+- `OrderResultURL` pointed to the public sandbox checkout success route.
+- The outgoing `CheckMacValue` was accepted by ECPay Sandbox cashier.
 
 ## Payment Success Webhook
 
@@ -107,10 +137,17 @@ Duplicate webhook handling:
 
 Manual sandbox validation still required:
 
-- Complete one ECPay Sandbox payment.
-- Confirm ECPay calls the configured `ReturnURL`.
-- Submit the same valid callback payload twice.
-- Confirm the second log is recorded as already processed and no duplicate paid transition is created.
+- Public sandbox checkout created a pending ECPay payment.
+- ECPay Sandbox cashier accepted the payment request.
+- A valid payment success webhook POST to the public sandbox endpoint returned `1|OK`.
+- Replaying the same valid payment callback twice returned `1|OK` both times.
+- Database-level log inspection should still be performed before production to confirm `PaymentWebhookLog.processingStatus` values for the successful and duplicate callbacks.
+
+Resolved Preview blocker:
+
+- Vercel Preview Deployment Protection blocks unauthenticated external webhook POSTs.
+- A manual POST to the Preview webhook endpoint returned Vercel login HTML instead of the expected `1|OK` response.
+- A dedicated public sandbox project now avoids the Preview Deployment Protection issue.
 
 ## Failed, Cancelled, and Expired Payments
 
@@ -176,15 +213,19 @@ Manual reconciliation still required after one live sandbox transaction:
 - Server-side amount recalculation is used in checkout service.
 - ECPay webhook code verifies CheckMacValue and amount before marking paid.
 - Duplicate paid webhook is designed to be idempotent.
+- Public sandbox webhook endpoint returned `1|OK` for a valid paid callback.
+- Public sandbox webhook endpoint returned `1|OK` for repeated valid paid callbacks.
 - Refund webhook is designed to be idempotent for already succeeded refunds.
 
 ## Failed or Blocked Items
 
-- Live ECPay Sandbox cashier page was not tested because sandbox credentials were not available in local env.
-- Live ECPay payment webhook was not tested because no public HTTPS webhook URL was configured for this local run.
+- Live ECPay Sandbox cashier page was opened successfully on Vercel Preview and on the public sandbox project.
+- Preview inbound webhook delivery was blocked by Vercel Deployment Protection, but the dedicated public sandbox webhook endpoint is reachable.
+- Vercel Preview payment migrations were applied successfully.
 - Live failed, cancelled, and expired ECPay sandbox callbacks were not tested.
 - Live ECPay sandbox refund API and refund webhook were not tested.
-- ECPay back-office reconciliation was not completed because no live sandbox transaction was created in this run.
+- Database-level `PaymentWebhookLog` inspection is still required for the public sandbox callbacks.
+- ECPay back-office reconciliation is still required.
 
 ## Production Readiness Status
 
@@ -192,10 +233,11 @@ Production mode remains forbidden.
 
 Do not set `ENABLE_ECPAY_PRODUCTION=true` until all of these are complete:
 
-- ECPay sandbox credentials are configured in a non-production environment.
-- Public HTTPS `ReturnURL`, `OrderResultURL`, and `RefundNotifyURL` are configured.
-- One successful sandbox payment is completed.
-- Duplicate payment webhook idempotency is verified.
+- ECPay sandbox credentials are configured in a non-production public sandbox environment.
+- Public HTTPS `ReturnURL`, `OrderResultURL`, and `RefundNotifyURL` are configured for the public sandbox project.
+- One successful sandbox payment webhook is accepted by the public sandbox endpoint.
+- Duplicate payment webhook idempotency is verified at endpoint-response level.
+- Database-level webhook log inspection is completed.
 - Failed, cancelled, and expired payment behavior is verified.
 - One sandbox refund and refund webhook are verified.
 - Finance reconciliation is performed against ECPay back-office records.
