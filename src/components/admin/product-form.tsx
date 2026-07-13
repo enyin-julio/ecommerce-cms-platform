@@ -1,4 +1,5 @@
 import type { Category, Media, Merchant, Product } from "@prisma/client";
+import { ProductImageField } from "@/components/admin/product-image-field";
 
 type ProductWithRelations = Product & {
   category?: Category | null;
@@ -23,6 +24,13 @@ export function ProductForm({
   submitLabel
 }: ProductFormProps) {
   const selectedMerchantId = product?.merchantId || merchants[0]?.id || "";
+  const mediaOptions = media.map((item) => ({
+    id: item.id,
+    url: item.url,
+    altText: item.altText,
+    fileName: item.fileName,
+    merchantName: item.merchant.name
+  }));
 
   return (
     <form
@@ -102,19 +110,7 @@ export function ProductForm({
         />
       </div>
 
-      <TextField
-        label="商品圖片 URL"
-        name="imageUrl"
-        list="product-media-urls"
-        defaultValue={product?.imageUrl || ""}
-      />
-      <datalist id="product-media-urls">
-        {media.map((item) => (
-          <option key={item.id} value={item.url}>
-            {item.altText || item.url}
-          </option>
-        ))}
-      </datalist>
+      <ProductImageField defaultValue={product?.imageUrl || ""} media={mediaOptions} />
 
       <TextArea
         label="簡短描述"
