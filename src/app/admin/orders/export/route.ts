@@ -45,6 +45,25 @@ const exportFieldMap = {
   updatedAt: "更新時間"
 } as const;
 
+const orderStatusLabels: Record<OrderStatusValue, string> = {
+  pending: "待處理",
+  unpaid: "未付款",
+  paid: "已付款",
+  processing: "處理中",
+  shipped: "已出貨",
+  cancelled: "已取消"
+};
+
+const paymentStatusLabels: Record<PaymentStatusValue, string> = {
+  unpaid: "未付款",
+  pending: "付款處理中",
+  paid: "已付款",
+  failed: "付款失敗",
+  cancelled: "付款取消",
+  expired: "付款逾期",
+  refunded: "已退款"
+};
+
 type ExportField = keyof typeof exportFieldMap;
 
 const defaultFields: ExportField[] = [
@@ -106,11 +125,12 @@ export async function GET(request: NextRequest) {
   const csv = [[...fields.map((field) => exportFieldMap[field])], ...rows]
     .map((row) => row.map(escapeCsvCell).join(","))
     .join("\r\n");
+  const fileName = `訂單-${new Date().toISOString().slice(0, 10)}.csv`;
 
-  return new NextResponse(csv, {
+  return new NextResponse(`\uFEFF${csv}`, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="orders-${new Date().toISOString().slice(0, 10)}.csv"`
+      "Content-Disposition": `attachment; filename="orders.csv"; filename*=UTF-8''${encodeURIComponent(fileName)}`
     }
   });
 }
@@ -135,9 +155,9 @@ function buildCsvRow(
       case "orderId":
         return order.id;
       case "status":
-        return order.status;
+        return orderStatusLabels[order.status as OrderStatusValue] || order.status;
       case "paymentStatus":
-        return order.paymentStatus;
+        return paymentStatusLabels[order.paymentStatus as PaymentStatusValue] || order.paymentStatus;
       case "customerName":
         return order.customerName;
       case "customerPhone":
