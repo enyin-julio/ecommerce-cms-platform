@@ -1,3 +1,4 @@
+import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import type { Category, Media, Merchant, Product } from "@prisma/client";
 import { ProductImageField } from "@/components/admin/product-image-field";
 
@@ -78,7 +79,7 @@ export function ProductForm({
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <TextField label="網址 Slug" name="slug" defaultValue={product?.slug} required />
+        <TextField label="網址代號（Slug）" name="slug" defaultValue={product?.slug} required />
         <TextField
           label="庫存"
           name="stock"
@@ -162,7 +163,7 @@ function TextField({
   label: string;
   name: string;
   defaultValue?: string | null;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
       <span className="text-sm font-medium text-ink">{label}</span>
@@ -186,7 +187,7 @@ function TextArea({
   label: string;
   name: string;
   defaultValue?: string | null;
-} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+} & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <label className="block">
       <span className="text-sm font-medium text-ink">{label}</span>

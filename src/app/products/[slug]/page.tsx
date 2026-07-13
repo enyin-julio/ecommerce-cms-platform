@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Product not found"
+      title: "找不到商品"
     };
   }
 
@@ -54,7 +54,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         />
         <div className="flex flex-col justify-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-            {product.category?.name || "Uncategorized"}
+            {product.category?.name || "未分類"}
           </p>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink" data-testid="product-detail-title">
             {product.name}
@@ -70,7 +70,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               </p>
             ) : null}
           </div>
-          <p className="mt-3 text-sm text-muted">Stock: {product.stock}</p>
+          <p className="mt-3 text-sm text-muted">庫存：{product.stock}</p>
           <form action={addToCartAction} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <input type="hidden" name="productId" value={product.id} />
             <input
@@ -89,11 +89,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               data-testid="add-to-cart"
             >
-              {isSoldOut ? "Sold out" : "Add to cart"}
+              {isSoldOut ? "已售完" : "加入購物車"}
             </button>
           </form>
           <div className="mt-10 border-t border-line pt-8">
-            <h2 className="text-lg font-semibold text-ink">Product details</h2>
+            <h2 className="text-lg font-semibold text-ink">商品詳情</h2>
             <p className="mt-3 whitespace-pre-line leading-8 text-muted">
               {product.description}
             </p>

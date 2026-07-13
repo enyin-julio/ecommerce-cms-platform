@@ -31,7 +31,7 @@ export function ProductImageField({ defaultValue, media }: ProductImageFieldProp
             name="imageUrl"
             value={imageUrl}
             onChange={(event) => setImageUrl(event.target.value)}
-            placeholder="可手動貼上圖片網址，或從右側媒體庫選擇"
+            placeholder="可貼上圖片網址，或從右側媒體庫選擇圖片"
             className="mt-2 w-full rounded-lg border border-line px-4 py-3 outline-none focus:border-brand-500"
             data-testid="admin-product-imageUrl"
           />
@@ -74,7 +74,7 @@ export function ProductImageField({ defaultValue, media }: ProductImageFieldProp
         </div>
       ) : (
         <p className="rounded-lg bg-slate-50 p-3 text-sm text-muted">
-          尚未設定商品圖片。可先到「媒體庫」上傳圖片，再回到這裡選擇。
+          尚未選擇商品圖片。可先到媒體庫上傳圖片，再回到這裡選擇。
         </p>
       )}
     </div>

@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   if (!page) {
     return {
-      title: "頁面不存在"
+      title: "找不到頁面"
     };
   }
 
@@ -51,7 +51,7 @@ export default async function PublicContentPage({ params }: PublicContentPagePro
       >
         <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-            {page.type === PageType.brand ? "Brand" : "Page"}
+            {page.type === PageType.brand ? "品牌頁" : "內容頁"}
           </p>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
             {page.heroTitle || page.title}

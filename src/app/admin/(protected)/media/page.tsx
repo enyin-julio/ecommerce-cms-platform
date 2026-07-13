@@ -21,11 +21,11 @@ export default async function AdminMediaPage() {
     <div className="space-y-6" data-testid="admin-media-page">
       <section>
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-          Media
+          媒體庫
         </p>
-        <h2 className="mt-2 text-2xl font-bold text-ink">媒體庫</h2>
+        <h2 className="mt-2 text-2xl font-bold text-ink">圖片上傳與管理</h2>
         <p className="mt-2 text-sm text-muted">
-          上傳商品與 CMS Hero 圖片。本機開發會存到 public/uploads，production 可切換為 Vercel Blob。
+          可上傳商品圖片與 CMS Hero 圖片。本機開發會儲存在 public/uploads，正式環境會依設定上傳至 Vercel Blob。
         </p>
       </section>
 
@@ -50,16 +50,16 @@ export default async function AdminMediaPage() {
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-ink">替代文字</span>
+          <span className="text-sm font-medium text-ink">圖片說明</span>
           <input
             name="altText"
-            placeholder="例如：夏季新品形象照"
+            placeholder="例如：商品主圖或首頁形象圖"
             className="mt-2 w-full rounded-lg border border-line px-4 py-3 outline-none focus:border-brand-500"
             data-testid="admin-media-altText"
           />
         </label>
         <label className="block md:col-span-2">
-          <span className="text-sm font-medium text-ink">圖片檔案</span>
+          <span className="text-sm font-medium text-ink">選擇圖片檔</span>
           <input
             name="file"
             type="file"
@@ -69,7 +69,7 @@ export default async function AdminMediaPage() {
             data-testid="admin-media-file"
           />
           <span className="mt-2 block text-xs text-muted">
-            支援 JPG、PNG、WebP，單檔上限 5MB。
+            支援 JPG、PNG、WebP，單檔大小上限 5MB。
           </span>
         </label>
         <div className="md:col-span-2">
@@ -98,10 +98,10 @@ export default async function AdminMediaPage() {
                 }}
               />
               <div className="space-y-2 p-4 text-sm">
-                <p className="font-semibold text-ink">{item.altText || "未命名圖片"}</p>
+                <p className="font-semibold text-ink">{item.altText || "未填圖片說明"}</p>
                 <p className="break-all text-muted">{item.url}</p>
                 <p className="text-muted">商家：{item.merchant.name}</p>
-                <p className="text-muted">儲存：{item.provider}</p>
+                <p className="text-muted">儲存服務：{item.provider}</p>
                 {item.fileName ? <p className="break-all text-muted">檔名：{item.fileName}</p> : null}
               </div>
             </div>
@@ -109,7 +109,7 @@ export default async function AdminMediaPage() {
         </section>
       ) : (
         <section className="rounded-lg border border-dashed border-line bg-white p-10 text-center text-muted">
-          目前尚未上傳媒體檔案。
+          目前還沒有上傳任何媒體檔案。
         </section>
       )}
     </div>

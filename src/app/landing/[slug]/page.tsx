@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: LandingPageProps): Promise<Me
 
   if (!page) {
     return {
-      title: "Landing Page"
+      title: "形象廣告頁"
     };
   }
 
@@ -47,7 +47,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
       >
         <div className="mx-auto max-w-5xl px-4 py-20 text-center sm:px-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-            Landing / {page.slug}
+            形象廣告頁 / {page.slug}
           </p>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-6xl">
             {page.heroTitle || page.title}

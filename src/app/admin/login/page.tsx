@@ -19,11 +19,11 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
       <section className="w-full max-w-md rounded-lg border border-line bg-white p-8 shadow-soft">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-          Admin
+          後台登入
         </p>
-        <h1 className="mt-3 text-2xl font-bold text-ink">登入管理後台</h1>
+        <h1 className="mt-3 text-2xl font-bold text-ink">登入後台管理中心</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
-          請使用管理者或商家帳號登入。customer 角色不可進入後台。
+          請使用系統管理員或商家帳號登入。一般會員無法進入後台。
         </p>
         {params.error ? (
           <div

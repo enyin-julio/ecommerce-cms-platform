@@ -27,7 +27,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   const params = await searchParams;
   const errorMessage =
     params?.error === "payment-not-enabled"
-      ? "正式付款尚未啟用。目前仍在等待綠界正式商店帳號審核，請先不要建立正式付款訂單。"
+      ? "正式金流尚未啟用，目前無法完成付款。請先保留商品資料，待金流開通後再進行正式交易。"
       : null;
 
   return (
@@ -61,7 +61,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
               defaultValue={customer?.email || ""}
               required
             />
-            <TextArea label="地址" name="address" defaultValue={customer?.address || ""} required />
+            <TextArea label="收件地址" name="address" defaultValue={customer?.address || ""} required />
             <TextArea label="備註" name="note" />
             <label className="block">
               <span className="text-sm font-medium text-ink">測試付款結果</span>
@@ -71,11 +71,11 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
                 className="mt-2 w-full rounded-lg border border-line px-4 py-3 outline-none focus:border-brand-500"
                 data-testid="checkout-mock-payment-result"
               >
-                <option value="success">付款成功</option>
-                <option value="failed">付款失敗</option>
+                <option value="success">測試付款成功</option>
+                <option value="failed">測試付款失敗</option>
               </select>
               <span className="mt-2 block text-xs text-muted">
-                目前為測試付款模式，不會串接真實金流，也不會收集信用卡資料。
+                目前正式金流尚未啟用，這個欄位只供測試訂單流程，不會進行真實刷卡。
               </span>
             </label>
             <button
@@ -84,12 +84,12 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
               className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               data-testid="place-order"
             >
-              建立訂單並測試付款
+              建立訂單
             </button>
           </form>
         </div>
         <aside className="h-fit rounded-lg border border-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-ink">訂單摘要</h2>
+          <h2 className="text-lg font-semibold text-ink">訂單明細</h2>
           <div className="mt-4 space-y-3">
             {cart?.items.map((item) => (
               <div key={item.id} className="flex justify-between gap-4 text-sm">

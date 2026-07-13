@@ -39,7 +39,7 @@ const paymentStatusLabels: Record<PaymentStatusValue, string> = {
   paid: "已付款",
   failed: "付款失敗",
   cancelled: "付款取消",
-  expired: "付款逾時",
+  expired: "付款逾期",
   refunded: "已退款"
 };
 
@@ -90,27 +90,27 @@ export default async function AdminOrderDetailPage({
           <p className="mt-1 text-sm text-muted">{order.customerEmail}</p>
           <p className="mt-1 text-sm text-muted">{order.customerPhone}</p>
         </InfoCard>
-        <InfoCard title="配送資訊">
+        <InfoCard title="收件資訊">
           <p className="text-sm leading-6 text-ink">
-            {shippingAddress?.address || "尚未填寫配送地址"}
+            {shippingAddress?.address || "尚未填寫收件地址"}
           </p>
           {order.note ? <p className="mt-2 text-sm text-muted">備註：{order.note}</p> : null}
         </InfoCard>
-        <InfoCard title="付款資訊">
+        <InfoCard title="付款資料">
           <p className="text-lg font-bold text-ink" data-testid="admin-order-payment-status">
             {paymentStatusLabels[paymentStatus]}
           </p>
           <p className="mt-2 text-sm text-muted">
-            Provider: {latestPayment?.provider || order.paymentProvider || "尚無付款服務"}
+            付款服務：{latestPayment?.provider || order.paymentProvider || "尚未建立付款資料"}
           </p>
           <p className="mt-1 break-all text-xs text-muted">
-            MerchantTradeNo: {latestPayment?.merchantTradeNo || "尚無交易訂單編號"}
+            金流訂單編號：{latestPayment?.merchantTradeNo || "尚未取得"}
           </p>
           <p className="mt-1 break-all text-xs text-muted">
-            Transaction: {latestPayment?.transactionId || order.paymentTransactionId || "尚無交易編號"}
+            交易編號：{latestPayment?.transactionId || order.paymentTransactionId || "尚未取得"}
           </p>
           <p className="mt-1 text-xs text-muted">
-            Paid at:{" "}
+            付款時間：{" "}
             {latestPayment?.paidAt
               ? latestPayment.paidAt.toLocaleString("zh-TW")
               : order.paidAt
@@ -135,7 +135,7 @@ export default async function AdminOrderDetailPage({
             className="mt-3 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500 disabled:bg-slate-100"
             data-testid="admin-order-status-select"
           >
-            {nextStatuses.length === 0 ? <option value="">沒有可用操作</option> : null}
+            {nextStatuses.length === 0 ? <option value="">沒有可執行的操作</option> : null}
             {nextStatuses.map((status) => (
               <option key={status} value={status}>
                 {statusLabels[status]}
@@ -144,7 +144,7 @@ export default async function AdminOrderDetailPage({
           </select>
           <input
             name="note"
-            placeholder="狀態備註"
+            placeholder="狀態更新備註"
             disabled={nextStatuses.length === 0}
             className="mt-3 w-full rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand-500 disabled:bg-slate-100"
             data-testid="admin-order-status-note"
@@ -201,9 +201,9 @@ export default async function AdminOrderDetailPage({
           className="rounded-lg border border-line bg-white p-6 shadow-sm"
           data-testid="admin-order-refund-form"
         >
-          <h3 className="text-lg font-semibold text-ink">退款作業 Sandbox</h3>
+          <h3 className="text-lg font-semibold text-ink">測試退款（Sandbox）</h3>
           <p className="mt-2 text-sm leading-6 text-muted">
-            目前只允許 Sandbox 記錄退款請求，不會呼叫正式綠界退款 API。
+            僅限綠界 Sandbox 測試訂單使用。正式收款尚未啟用時，不會執行正式退款 API。
           </p>
           <input
             name="amount"
@@ -228,7 +228,7 @@ export default async function AdminOrderDetailPage({
             className="mt-3 rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
             data-testid="admin-order-refund-submit"
           >
-            建立退款請求
+            建立退款測試
           </button>
         </form>
 
@@ -268,7 +268,7 @@ export default async function AdminOrderDetailPage({
                     -&gt; {statusLabels[history.nextStatus as OrderStatusValue]}
                   </p>
                   <p className="mt-1 text-muted">
-                    {history.changedBy?.email || "系統"} &middot;{" "}
+                    {history.changedBy?.email || "系統"} ·{" "}
                     {history.createdAt.toLocaleString("zh-TW")}
                   </p>
                   {history.note ? <p className="mt-2 text-muted">{history.note}</p> : null}
@@ -291,7 +291,7 @@ export default async function AdminOrderDetailPage({
                     {movement.quantity}
                   </p>
                   <p className="mt-1 text-muted">
-                    {movement.reason} &middot; {movement.createdAt.toLocaleString("zh-TW")}
+                    {movement.reason} · {movement.createdAt.toLocaleString("zh-TW")}
                   </p>
                 </div>
               ))

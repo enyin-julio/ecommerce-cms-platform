@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 const typeLabels: Record<PageTypeValue, string> = {
   brand: "品牌形象頁",
-  landing: "Landing Page",
+  landing: "形象廣告頁",
   content: "一般內容頁"
 };
 
@@ -27,13 +27,13 @@ export default async function AdminPagesPage() {
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-            CMS
+            CMS 頁面
           </p>
-          <h2 className="mt-2 text-2xl font-bold text-ink">CMS 頁面管理</h2>
+          <h2 className="mt-2 text-2xl font-bold text-ink">頁面列表</h2>
           <p className="mt-2 text-sm text-muted">
             {session.role === "admin"
-              ? "管理者可查看與管理全部 CMS 頁面。"
-              : "商家只能查看與管理自己的 CMS 頁面。"}
+              ? "系統管理員可查看並管理所有商家的 CMS 頁面。"
+              : "商家帳號只能查看與管理自己名下的 CMS 頁面。"}
           </p>
         </div>
         <Link
@@ -51,11 +51,11 @@ export default async function AdminPagesPage() {
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-5 py-3 font-semibold">標題</th>
-                <th className="px-5 py-3 font-semibold">Slug</th>
+                <th className="px-5 py-3 font-semibold">網址代號（Slug）</th>
                 <th className="px-5 py-3 font-semibold">類型</th>
                 <th className="px-5 py-3 font-semibold">商家</th>
                 <th className="px-5 py-3 font-semibold">狀態</th>
-                <th className="px-5 py-3 font-semibold">更新時間</th>
+                <th className="px-5 py-3 font-semibold">最後更新</th>
                 <th className="px-5 py-3 font-semibold">操作</th>
               </tr>
             </thead>
@@ -111,7 +111,7 @@ export default async function AdminPagesPage() {
               ) : (
                 <tr>
                   <td colSpan={7} className="px-5 py-10 text-center text-muted">
-                    目前沒有 CMS 頁面。
+                    目前沒有 CMS 頁面資料。
                   </td>
                 </tr>
               )}

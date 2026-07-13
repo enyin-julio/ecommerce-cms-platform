@@ -61,7 +61,7 @@ const paymentStatusLabels: Record<PaymentStatusValue, string> = {
   paid: "已付款",
   failed: "付款失敗",
   cancelled: "付款取消",
-  expired: "付款逾時",
+  expired: "付款逾期",
   refunded: "已退款"
 };
 
@@ -104,13 +104,13 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
     <div className="space-y-6" data-testid="admin-orders-page">
       <section>
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-          Orders
+          訂單管理
         </p>
-        <h2 className="mt-2 text-2xl font-bold text-ink">訂單管理</h2>
+        <h2 className="mt-2 text-2xl font-bold text-ink">訂單列表</h2>
         <p className="mt-2 text-sm text-muted">
           {session.role === "admin"
-            ? "管理全平台訂單、付款狀態與出貨流程。"
-            : "管理與你商品相關的訂單與付款狀態。"}
+            ? "系統管理員可查看全部訂單、付款狀態與出貨進度。"
+            : "商家帳號只能查看包含自己商品的訂單。"}
         </p>
       </section>
 
@@ -177,7 +177,7 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
           <div>
             <p className="text-sm font-semibold text-ink">匯出 CSV</p>
             <p className="mt-1 text-sm text-muted">
-              依目前篩選條件匯出目前帳號有權限查看的訂單資料，只供對帳、出貨與營運分析。
+              可依目前搜尋條件匯出訂單資料。匯出內容只包含目前帳號有權限查看的訂單。
             </p>
           </div>
           <button

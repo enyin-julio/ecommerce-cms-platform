@@ -28,10 +28,10 @@ export function getOrderStatusHint(status: OrderStatusValue) {
     case OrderStatus.processing:
       return "處理中訂單可改為已出貨或已取消。";
     case OrderStatus.shipped:
-      return "已出貨訂單不可回退到前面狀態。";
+      return "已出貨訂單不可回退到前一個狀態。";
     case OrderStatus.cancelled:
       return "已取消訂單不可再變更狀態。";
     default:
-      return "目前沒有可用的狀態操作。";
+      return "目前沒有可執行的狀態操作。";
   }
 }

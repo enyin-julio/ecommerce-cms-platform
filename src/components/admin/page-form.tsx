@@ -1,3 +1,4 @@
+import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import type { Media, Merchant, Page } from "@prisma/client";
 import { PageType } from "@/lib/domain-types";
 
@@ -47,7 +48,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
             data-testid="admin-page-type"
           >
             <option value={PageType.brand}>品牌形象頁</option>
-            <option value={PageType.landing}>Landing Page</option>
+            <option value={PageType.landing}>形象廣告頁</option>
             <option value={PageType.content}>一般內容頁</option>
           </select>
         </label>
@@ -55,7 +56,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
 
       <div className="grid gap-5 sm:grid-cols-2">
         <TextField label="頁面標題" name="title" defaultValue={page?.title} required />
-        <TextField label="網址 Slug" name="slug" defaultValue={page?.slug} required />
+        <TextField label="網址代號（Slug）" name="slug" defaultValue={page?.slug} required />
       </div>
 
       <TextField label="Hero 標題" name="heroTitle" defaultValue={page?.heroTitle || ""} />
@@ -100,7 +101,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
           className="h-4 w-4 rounded border-line text-brand-600"
           data-testid="admin-page-isPublished"
         />
-        發布頁面
+        發布此頁面
       </label>
 
       <div className="flex justify-end">
@@ -125,7 +126,7 @@ function TextField({
   label: string;
   name: string;
   defaultValue?: string | null;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
       <span className="text-sm font-medium text-ink">{label}</span>
@@ -151,7 +152,7 @@ function TextArea({
   name: string;
   defaultValue?: string | null;
   rows?: number;
-} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+} & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <label className="block">
       <span className="text-sm font-medium text-ink">{label}</span>

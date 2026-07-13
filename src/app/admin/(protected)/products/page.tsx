@@ -20,13 +20,13 @@ export default async function AdminProductsPage() {
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-            Products
+            商品管理
           </p>
-          <h2 className="mt-2 text-2xl font-bold text-ink">商品管理</h2>
+          <h2 className="mt-2 text-2xl font-bold text-ink">商品列表</h2>
           <p className="mt-2 text-sm text-muted">
             {session.role === "admin"
-              ? "管理者可查看與管理全部商品。"
-              : "商家只能查看與管理自己的商品。"}
+              ? "系統管理員可查看並管理所有商家的商品。"
+              : "商家帳號只能查看與管理自己名下的商品。"}
           </p>
         </div>
         <Link
@@ -50,7 +50,7 @@ export default async function AdminProductsPage() {
                 <th className="px-5 py-3 font-semibold">售價</th>
                 <th className="px-5 py-3 font-semibold">庫存</th>
                 <th className="px-5 py-3 font-semibold">狀態</th>
-                <th className="px-5 py-3 font-semibold">更新時間</th>
+                <th className="px-5 py-3 font-semibold">最後更新</th>
                 <th className="px-5 py-3 font-semibold">操作</th>
               </tr>
             </thead>
@@ -73,7 +73,7 @@ export default async function AdminProductsPage() {
                     <td className="px-5 py-4 text-muted">{product.stock}</td>
                     <td className="px-5 py-4">
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-muted">
-                        {product.isPublished ? "已上架" : "已下架"}
+                        {product.isPublished ? "已上架" : "未上架"}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-muted">

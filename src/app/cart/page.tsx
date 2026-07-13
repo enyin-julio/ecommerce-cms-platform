@@ -9,7 +9,7 @@ import { calculateCartTotals, getCurrentCart } from "@/modules/cart/cart.service
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Cart"
+  title: "購物車"
 };
 
 export default async function CartPage() {
@@ -23,12 +23,12 @@ export default async function CartPage() {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-              Cart
+              購物車
             </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Shopping cart</h1>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">我的購物車</h1>
           </div>
           <Link href="/products" className="text-sm font-semibold text-brand-700">
-            Continue shopping
+            繼續逛商品
           </Link>
         </div>
 
@@ -50,7 +50,7 @@ export default async function CartPage() {
                   <div>
                     <h2 className="font-semibold text-ink">{item.product.name}</h2>
                     <p className="mt-2 text-sm text-muted">
-                      {formatCurrency(item.product.price.toString())} · Stock {item.product.stock}
+                      {formatCurrency(item.product.price.toString())} / 庫存 {item.product.stock}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <form
@@ -69,7 +69,7 @@ export default async function CartPage() {
                           type="submit"
                           className="rounded-full border border-line px-4 py-2 text-sm font-semibold hover:border-brand-500"
                         >
-                          Update
+                          更新數量
                         </button>
                       </form>
                       <form action={removeCartItemAction.bind(null, item.id)}>
@@ -77,7 +77,7 @@ export default async function CartPage() {
                           type="submit"
                           className="rounded-full border border-red-100 px-4 py-2 text-sm font-semibold text-red-600 hover:border-red-300"
                         >
-                          Remove
+                          移除
                         </button>
                       </form>
                     </div>
@@ -89,13 +89,13 @@ export default async function CartPage() {
               ))}
             </div>
             <aside className="h-fit rounded-lg border border-line bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-ink">Summary</h2>
+              <h2 className="text-lg font-semibold text-ink">訂單摘要</h2>
               <div className="mt-4 flex justify-between text-sm text-muted">
-                <span>Subtotal</span>
+                <span>小計</span>
                 <span>{formatCurrency(totals.subtotal)}</span>
               </div>
               <div className="mt-3 flex justify-between text-base font-bold text-ink">
-                <span>Total</span>
+                <span>總金額</span>
                 <span>{formatCurrency(totals.total)}</span>
               </div>
               <Link
@@ -103,14 +103,14 @@ export default async function CartPage() {
                 className="mt-6 block rounded-full bg-brand-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-brand-700"
                 data-testid="cart-checkout-link"
               >
-                Checkout
+                前往結帳
               </Link>
             </aside>
           </div>
         ) : (
           <div className="mt-8 rounded-lg border border-dashed border-line bg-white p-10 text-center">
-            <h2 className="text-lg font-semibold text-ink">Your cart is empty</h2>
-            <p className="mt-2 text-sm text-muted">Add products before checkout.</p>
+            <h2 className="text-lg font-semibold text-ink">購物車目前是空的</h2>
+            <p className="mt-2 text-sm text-muted">請先加入商品，再前往結帳。</p>
           </div>
         )}
       </section>
