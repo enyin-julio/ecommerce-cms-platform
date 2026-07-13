@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { PageType } from "@/lib/domain-types";
 import type { AdminSession } from "@/lib/session-token";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getAdminPages(session: AdminSession) {
   return prisma.page.findMany({
@@ -44,5 +45,31 @@ export async function getPublishedPageBySlug(slug: string, type?: PageType) {
     include: {
       merchant: true
     }
+  });
+}
+
+export async function getPublishedNavigationPages() {
+  noStore();
+
+  return prisma.page.findMany({
+    where: {
+      isPublished: true
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      type: true,
+      heroSubtitle: true
+    },
+    orderBy: [
+      {
+        type: "asc"
+      },
+      {
+        updatedAt: "desc"
+      }
+    ],
+    take: 12
   });
 }

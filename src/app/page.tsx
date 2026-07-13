@@ -1,13 +1,22 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/public/site-header";
+import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
+import { getPublishedNavigationPages } from "@/modules/content/page.repository";
 
-export default function HomePage() {
+const pageTypeLabels: Record<PageTypeValue, string> = {
+  brand: "品牌頁",
+  landing: "形象廣告頁",
+  content: "內容頁"
+};
+
+export default async function HomePage() {
   const highlights = [
     "品牌形象官網",
     "形象廣告頁",
     "商品型錄",
     "後台管理"
   ];
+  const pages = await getPublishedPagesSafely();
 
   return (
     <main className="min-h-screen bg-white">
@@ -54,6 +63,57 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {pages.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
+                網站頁面
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-ink">探索更多內容</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                後台發布的 CMS 頁面會自動顯示在這裡，訪客可以直接點選查看。
+              </p>
+            </div>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pages.map((page) => (
+              <Link
+                key={page.id}
+                href={getPublicPageHref(page)}
+                className="rounded-lg border border-line bg-white p-5 shadow-sm hover:border-brand-500"
+              >
+                <span className="text-xs font-semibold text-brand-600">
+                  {pageTypeLabels[page.type as PageTypeValue]}
+                </span>
+                <h3 className="mt-3 text-lg font-bold text-ink">{page.title}</h3>
+                {page.heroSubtitle ? (
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
+                    {page.heroSubtitle}
+                  </p>
+                ) : null}
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
+}
+
+function getPublicPageHref(page: { slug: string; type: string }) {
+  if (page.type === PageType.landing) {
+    return `/landing/${page.slug}`;
+  }
+
+  return `/pages/${page.slug}`;
+}
+
+async function getPublishedPagesSafely() {
+  try {
+    return await getPublishedNavigationPages();
+  } catch {
+    return [];
+  }
 }
