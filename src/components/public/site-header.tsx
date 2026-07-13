@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
-import { getPublishedNavigationPages } from "@/modules/content/page.repository";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
+import { getPublishedNavigationPages } from "@/modules/content/page.repository";
+import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 
 const pageTypeLabels: Record<PageTypeValue, string> = {
   brand: "品牌頁",
@@ -9,13 +11,26 @@ const pageTypeLabels: Record<PageTypeValue, string> = {
 };
 
 export async function SiteHeader() {
-  const pages = await getPublishedNavigationPagesSafely();
+  const [pages, siteSetting] = await Promise.all([
+    getPublishedNavigationPagesSafely(),
+    getPublicSiteSettingSafely()
+  ]);
+  const siteName = siteSetting?.siteName || "AIH 品牌商城";
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <Link href="/" className="text-lg font-bold tracking-tight text-ink">
-          AIH 品牌商城
+        <Link href="/" className="flex items-center gap-3 text-lg font-bold tracking-tight text-ink">
+          {siteSetting?.logoUrl ? (
+            <Image
+              src={siteSetting.logoUrl}
+              alt={`${siteName} Logo`}
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-md object-contain"
+            />
+          ) : null}
+          <span>{siteName}</span>
         </Link>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-muted">
           <Link className="hover:text-ink" href="/about">
@@ -69,6 +84,10 @@ export async function SiteHeader() {
 }
 
 function getPublicPageHref(page: { slug: string; type: string }) {
+  if (page.type === PageType.brand) {
+    return "/about";
+  }
+
   if (page.type === PageType.landing) {
     return `/landing/${page.slug}`;
   }
@@ -81,5 +100,13 @@ async function getPublishedNavigationPagesSafely() {
     return await getPublishedNavigationPages();
   } catch {
     return [];
+  }
+}
+
+async function getPublicSiteSettingSafely() {
+  try {
+    return await getPublicSiteSetting();
+  } catch {
+    return null;
   }
 }

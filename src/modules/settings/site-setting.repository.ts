@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { AdminSession } from "@/lib/session-token";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getAdminSiteSetting(merchantId: string, session: AdminSession) {
   return prisma.siteSetting.findFirst({
@@ -11,6 +12,19 @@ export async function getAdminSiteSetting(merchantId: string, session: AdminSess
     },
     include: {
       merchant: true
+    }
+  });
+}
+
+export async function getPublicSiteSetting() {
+  noStore();
+
+  return prisma.siteSetting.findFirst({
+    include: {
+      merchant: true
+    },
+    orderBy: {
+      updatedAt: "desc"
     }
   });
 }

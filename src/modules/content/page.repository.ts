@@ -48,6 +48,23 @@ export async function getPublishedPageBySlug(slug: string, type?: PageType) {
   });
 }
 
+export async function getPublishedBrandPage() {
+  noStore();
+
+  return prisma.page.findFirst({
+    where: {
+      type: "brand",
+      isPublished: true
+    },
+    include: {
+      merchant: true
+    },
+    orderBy: {
+      updatedAt: "desc"
+    }
+  });
+}
+
 export async function getPublishedNavigationPages() {
   noStore();
 
