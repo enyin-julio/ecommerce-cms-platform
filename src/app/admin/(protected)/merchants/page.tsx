@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import {
   createMerchantAction,
   deleteMerchantAction,
+  toggleMerchantActiveAction,
   updateMerchantAction
 } from "@/app/admin/(protected)/merchants/actions";
 import { prisma } from "@/lib/prisma";
@@ -106,6 +107,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
             <thead className="bg-slate-900 text-left text-white">
               <tr>
                 <th className="px-5 py-4 font-semibold">商家名稱</th>
+                <th className="px-5 py-4 font-semibold">狀態</th>
                 <th className="px-5 py-4 font-semibold">網址代號</th>
                 <th className="px-5 py-4 font-semibold">聯絡 Email</th>
                 <th className="px-5 py-4 font-semibold">資料數量</th>
@@ -141,6 +143,17 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                           data-testid="admin-merchant-name"
                         />
                       </form>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                          merchant.isActive
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {merchant.isActive ? "啟用中" : "已停用"}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       <input
@@ -192,21 +205,36 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                         </button>
 
                         {session.role === "admin" ? (
-                          <form action={deleteMerchantAction.bind(null, merchant.id)}>
-                            <button
-                              type="submit"
-                              disabled={!canDelete}
-                              className="rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-line disabled:text-muted"
-                              data-testid="admin-merchant-delete"
-                            >
-                              刪除
-                            </button>
-                            {!canDelete ? (
-                              <p className="mt-2 max-w-40 text-xs leading-5 text-muted">
-                                此商家仍有關聯資料，不能直接刪除。
-                              </p>
-                            ) : null}
-                          </form>
+                          <>
+                            <form action={toggleMerchantActiveAction.bind(null, merchant.id)}>
+                              <button
+                                type="submit"
+                                className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                                  merchant.isActive
+                                    ? "border-amber-200 bg-white text-amber-700 hover:bg-amber-50"
+                                    : "border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
+                                }`}
+                                data-testid="admin-merchant-toggle"
+                              >
+                                {merchant.isActive ? "停用" : "啟用"}
+                              </button>
+                            </form>
+                            <form action={deleteMerchantAction.bind(null, merchant.id)}>
+                              <button
+                                type="submit"
+                                disabled={!canDelete}
+                                className="rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-line disabled:text-muted"
+                                data-testid="admin-merchant-delete"
+                              >
+                                刪除
+                              </button>
+                              {!canDelete ? (
+                                <p className="mt-2 max-w-40 text-xs leading-5 text-muted">
+                                  此商家仍有關聯資料，不能直接刪除；可改用停用。
+                                </p>
+                              ) : null}
+                            </form>
+                          </>
                         ) : null}
                       </div>
                     </td>
@@ -215,7 +243,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
               })}
               {merchants.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-10 text-center text-muted">
+                  <td colSpan={7} className="px-5 py-10 text-center text-muted">
                     目前沒有商家資料。
                   </td>
                 </tr>

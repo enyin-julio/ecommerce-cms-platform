@@ -40,6 +40,9 @@ export async function getPublishedPageBySlug(slug: string, type?: PageType) {
     where: {
       slug,
       isPublished: true,
+      merchant: {
+        isActive: true
+      },
       ...(type ? { type } : {})
     },
     include: {
@@ -54,7 +57,10 @@ export async function getPublishedBrandPage() {
   return prisma.page.findFirst({
     where: {
       type: "brand",
-      isPublished: true
+      isPublished: true,
+      merchant: {
+        isActive: true
+      }
     },
     include: {
       merchant: true
@@ -70,7 +76,10 @@ export async function getPublishedNavigationPages() {
 
   return prisma.page.findMany({
     where: {
-      isPublished: true
+      isPublished: true,
+      merchant: {
+        isActive: true
+      }
     },
     select: {
       id: true,

@@ -128,6 +128,37 @@ export async function deleteMerchantAction(merchantId: string) {
   redirectToMerchants("商家已刪除。");
 }
 
+export async function toggleMerchantActiveAction(merchantId: string) {
+  await requireRoles(["admin"]);
+
+  const merchant = await prisma.merchant.findUnique({
+    where: {
+      id: merchantId
+    },
+    select: {
+      isActive: true
+    }
+  });
+
+  if (!merchant) {
+    return redirectToMerchants("找不到商家資料。");
+  }
+
+  const nextIsActive = !merchant.isActive;
+
+  await prisma.merchant.update({
+    where: {
+      id: merchantId
+    },
+    data: {
+      isActive: nextIsActive
+    }
+  });
+
+  revalidateMerchantPaths();
+  redirectToMerchants(nextIsActive ? "商家已啟用。" : "商家已停用，前台將不再顯示此商家的公開資料。");
+}
+
 function revalidateMerchantPaths() {
   revalidatePath("/admin/merchants");
   revalidatePath("/admin/settings");

@@ -20,6 +20,11 @@ export async function getPublicSiteSetting() {
   noStore();
 
   return prisma.siteSetting.findFirst({
+    where: {
+      merchant: {
+        isActive: true
+      }
+    },
     include: {
       merchant: true
     },

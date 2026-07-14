@@ -72,7 +72,10 @@ export async function addProductToCart(productId: string, quantity: number) {
   const product = await prisma.product.findFirst({
     where: {
       id: productId,
-      isPublished: true
+      isPublished: true,
+      merchant: {
+        isActive: true
+      }
     }
   });
 

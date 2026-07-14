@@ -27,7 +27,10 @@ const publicProductSelect = {
 export async function getPublishedProducts() {
   return prisma.product.findMany({
     where: {
-      isPublished: true
+      isPublished: true,
+      merchant: {
+        isActive: true
+      }
     },
     select: publicProductSelect,
     orderBy: {
@@ -41,7 +44,10 @@ export async function getPublishedProductCategories() {
     where: {
       products: {
         some: {
-          isPublished: true
+          isPublished: true,
+          merchant: {
+            isActive: true
+          }
         }
       }
     },
@@ -53,7 +59,10 @@ export async function getPublishedProductCategories() {
         select: {
           products: {
             where: {
-              isPublished: true
+              isPublished: true,
+              merchant: {
+                isActive: true
+              }
             }
           }
         }
@@ -69,7 +78,10 @@ export async function getPublishedProductBySlug(slug: string) {
   return prisma.product.findFirst({
     where: {
       slug,
-      isPublished: true
+      isPublished: true,
+      merchant: {
+        isActive: true
+      }
     },
     select: publicProductSelect
   });
