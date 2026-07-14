@@ -1,19 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
+import { getCurrentCustomer } from "@/lib/customer-session";
 import { getPublishedNavigationPages } from "@/modules/content/page.repository";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 
 const pageTypeLabels: Record<PageTypeValue, string> = {
-  brand: "品牌頁",
-  landing: "形象廣告頁",
+  brand: "品牌",
+  landing: "形象頁",
   content: "內容頁"
 };
 
 export async function SiteHeader() {
-  const [pages, siteSetting] = await Promise.all([
+  const [pages, siteSetting, customer] = await Promise.all([
     getPublishedNavigationPagesSafely(),
-    getPublicSiteSettingSafely()
+    getPublicSiteSettingSafely(),
+    getCurrentCustomerSafely()
   ]);
   const siteName = siteSetting?.siteName || "AIH 品牌商城";
   const brandPage = pages.find((page) => page.type === PageType.brand);
@@ -23,7 +25,7 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
         <Link href="/" className="flex items-center gap-3 text-lg font-bold tracking-tight text-ink">
           {siteSetting?.logoUrl ? (
             <Image
@@ -38,7 +40,7 @@ export async function SiteHeader() {
         </Link>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-muted">
           <Link className="hover:text-ink" href="/about">
-            {brandPage?.title || "品牌介紹"}
+            {brandPage?.title || "關於品牌"}
           </Link>
           <Link className="hover:text-ink" href="/products">
             商品
@@ -74,16 +76,32 @@ export async function SiteHeader() {
           <Link className="hover:text-ink" href="/cart">
             購物車
           </Link>
-          <Link className="hover:text-ink" href="/account">
-            會員中心
-          </Link>
-          <Link className="hover:text-ink" href="/login">
-            登入
-          </Link>
-          <Link
-            className="rounded-full bg-brand-600 px-4 py-2 text-white hover:bg-brand-700"
-            href="/admin"
-          >
+          {customer ? (
+            <>
+              <Link
+                className="rounded-full bg-brand-600 px-4 py-2 text-white hover:bg-brand-700"
+                href="/account"
+              >
+                會員中心
+              </Link>
+              <Link className="hover:text-ink" href="/logout">
+                登出
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="hover:text-ink" href="/login">
+                登入
+              </Link>
+              <Link
+                className="rounded-full bg-brand-600 px-4 py-2 text-white hover:bg-brand-700"
+                href="/register"
+              >
+                註冊
+              </Link>
+            </>
+          )}
+          <Link className="hover:text-ink" href="/admin">
             後台
           </Link>
         </nav>
@@ -115,6 +133,14 @@ async function getPublishedNavigationPagesSafely() {
 async function getPublicSiteSettingSafely() {
   try {
     return await getPublicSiteSetting();
+  } catch {
+    return null;
+  }
+}
+
+async function getCurrentCustomerSafely() {
+  try {
+    return await getCurrentCustomer();
   } catch {
     return null;
   }
