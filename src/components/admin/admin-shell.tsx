@@ -1,22 +1,21 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { clsx } from "clsx";
 import { logoutAction } from "@/app/admin/actions";
 import type { AdminSession } from "@/lib/session-token";
 
 const navItems = [
   { href: "/admin", label: "總覽" },
-  { href: "/admin/products", label: "商品管理" },
+  { href: "/admin/settings", label: "網站設定" },
   { href: "/admin/pages", label: "頁面管理" },
+  { href: "/admin/products", label: "商品管理" },
   { href: "/admin/media", label: "媒體庫" },
-  { href: "/admin/orders", label: "訂單管理" },
-  { href: "/admin/settings", label: "網站設定" }
+  { href: "/admin/orders", label: "訂單管理" }
 ];
 
 const roleLabels: Record<AdminSession["role"], string> = {
   admin: "系統管理員",
   merchant: "商家",
-  customer: "顧客"
+  customer: "會員"
 };
 
 type AdminShellProps = {
@@ -38,9 +37,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={clsx(
-                "block whitespace-nowrap rounded-lg px-4 py-3 text-sm font-medium text-muted hover:bg-brand-50 hover:text-brand-700"
-              )}
+              className="block whitespace-nowrap rounded-lg px-4 py-3 text-sm font-medium text-muted hover:bg-brand-50 hover:text-brand-700"
             >
               {item.label}
             </Link>
