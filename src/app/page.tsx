@@ -1,8 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
+import { formatCurrency } from "@/lib/format";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
-import { getPublishedNavigationPages } from "@/modules/content/page.repository";
+import { getPublishedProducts } from "@/modules/catalog/product.repository";
+import {
+  getPublishedBrandPage,
+  getPublishedNavigationPages
+} from "@/modules/content/page.repository";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 
 export const dynamic = "force-dynamic";
@@ -25,24 +30,30 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [pages, siteSetting] = await Promise.all([
+  const [pages, products, brandPage, siteSetting] = await Promise.all([
     getPublishedPagesSafely(),
+    getPublishedProductsSafely(),
+    getPublishedBrandPageSafely(),
     getPublicSiteSettingSafely()
   ]);
   const siteName = siteSetting?.siteName || "AIH 品牌商城";
   const primaryColor = siteSetting?.primaryColor || "#2563eb";
-  const highlights = [
-    "品牌形象官網",
-    "形象廣告頁",
-    "商品型錄",
-    "後台管理"
-  ];
+  const heroTitle = brandPage?.heroTitle || siteName;
+  const heroDescription =
+    brandPage?.heroSubtitle ||
+    siteSetting?.seoDescription ||
+    "用一套後台管理品牌內容、商品型錄、購物流程與訂單營運。";
+  const heroImageUrl = brandPage?.heroImageUrl || siteSetting?.logoUrl || "";
+  const landingPages = pages.filter((page) => page.type === PageType.landing);
+  const contentPages = pages.filter((page) => page.type !== PageType.brand);
+  const featuredProducts = products.slice(0, 3);
 
   return (
     <main className="min-h-screen bg-white">
       <SiteHeader />
+
       <section className="bg-gradient-to-br from-brand-50 via-white to-white">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:py-28">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:py-24">
           <div>
             <p
               className="text-sm font-semibold uppercase tracking-[0.2em]"
@@ -51,12 +62,9 @@ export default async function HomePage() {
               品牌電商 CMS
             </p>
             <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-ink sm:text-6xl">
-              {siteName}
+              {heroTitle}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-              {siteSetting?.seoDescription ||
-                "用一套後台管理品牌內容、商品型錄、購物流程與訂單營運。前台支援響應式頁面與 SEO，適合逐步擴充成完整電商平台。"}
-            </p>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">{heroDescription}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/products"
@@ -73,59 +81,205 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {highlights.map((item) => (
-                <div key={item} className="rounded-lg bg-slate-50 p-5">
-                  <p className="text-sm font-semibold text-ink">{item}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted">
-                    從後台維護內容、圖片、SEO、商品與訂單資料，並同步到前台呈現。
-                  </p>
+
+          <div className="overflow-hidden rounded-lg border border-line bg-white shadow-soft">
+            {heroImageUrl ? (
+              <div
+                className="aspect-[4/3] bg-slate-100 bg-cover bg-center"
+                style={{ backgroundImage: `url("${heroImageUrl}")` }}
+                aria-label={`${heroTitle} 主視覺`}
+              />
+            ) : (
+              <div className="grid aspect-[4/3] place-items-center bg-slate-50 p-8">
+                <div className="text-center">
+                  <div
+                    className="mx-auto grid h-20 w-20 place-items-center rounded-lg text-3xl font-bold text-white"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    {siteName.slice(0, 1)}
+                  </div>
+                  <p className="mt-5 text-sm text-muted">可在後台網站設定或品牌頁加入首頁主視覺。</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {pages.length > 0 ? (
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-            <div>
-              <p
-                className="text-sm font-semibold uppercase tracking-[0.2em]"
-                style={{ color: primaryColor }}
-              >
-                網站頁面
-              </p>
-              <h2 className="mt-3 text-3xl font-bold text-ink">探索更多內容</h2>
-              <p className="mt-3 text-sm leading-6 text-muted">
-                後台發布的 CMS 頁面會自動顯示在這裡，訪客可以直接點選查看。
-              </p>
-            </div>
-          </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {pages.map((page) => (
+      {landingPages.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+          <SectionHeading
+            eyebrow="形象廣告"
+            title="最新活動與品牌主題"
+            description="後台發布的形象廣告頁會自動出現在這裡。"
+            color={primaryColor}
+          />
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {landingPages.slice(0, 2).map((page) => (
               <Link
                 key={page.id}
                 href={getPublicPageHref(page)}
-                className="rounded-lg border border-line bg-white p-5 shadow-sm hover:border-brand-500"
+                className="group overflow-hidden rounded-lg border border-line bg-white shadow-sm hover:border-brand-500"
               >
-                <span className="text-xs font-semibold" style={{ color: primaryColor }}>
-                  {pageTypeLabels[page.type as PageTypeValue]}
-                </span>
-                <h3 className="mt-3 text-lg font-bold text-ink">{page.title}</h3>
-                {page.heroSubtitle ? (
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
-                    {page.heroSubtitle}
-                  </p>
+                {page.heroImageUrl ? (
+                  <div
+                    className="aspect-[16/9] bg-slate-100 bg-cover bg-center"
+                    style={{ backgroundImage: `url("${page.heroImageUrl}")` }}
+                    aria-label={`${page.title} 圖片`}
+                  />
                 ) : null}
+                <div className="p-5">
+                  <p className="text-xs font-semibold" style={{ color: primaryColor }}>
+                    {pageTypeLabels[page.type as PageTypeValue]}
+                  </p>
+                  <h3 className="mt-3 text-xl font-bold text-ink group-hover:text-brand-700">
+                    {page.title}
+                  </h3>
+                  {page.heroSubtitle ? (
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
+                      {page.heroSubtitle}
+                    </p>
+                  ) : null}
+                </div>
               </Link>
             ))}
           </div>
         </section>
       ) : null}
+
+      {featuredProducts.length > 0 ? (
+        <section className="bg-slate-50 py-14">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <SectionHeading
+                eyebrow="精選商品"
+                title="後台上架商品"
+                description="已上架商品會自動出現在前台，這裡先顯示最新三筆。"
+                color={primaryColor}
+              />
+              <Link
+                href="/products"
+                className="w-fit rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold text-ink hover:border-brand-500"
+              >
+                查看全部商品
+              </Link>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="overflow-hidden rounded-lg border border-line bg-white shadow-sm hover:border-brand-500"
+                >
+                  {product.imageUrl ? (
+                    <div
+                      className="aspect-[4/3] bg-slate-100 bg-cover bg-center"
+                      style={{ backgroundImage: `url("${product.imageUrl}")` }}
+                      aria-label={`${product.name} 商品圖`}
+                    />
+                  ) : (
+                    <div className="grid aspect-[4/3] place-items-center bg-white text-sm text-muted">
+                      尚未設定商品圖片
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <p className="text-xs text-muted">{product.category?.name || "未分類"}</p>
+                    <h3 className="mt-2 text-lg font-bold text-ink">{product.name}</h3>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
+                      {product.shortDescription}
+                    </p>
+                    <p className="mt-4 text-lg font-bold text-ink">
+                      {formatCurrency(product.price.toString())}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {brandPage || contentPages.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+          <SectionHeading
+            eyebrow="網站內容"
+            title="品牌與服務資訊"
+            description="後台發布的一般內容頁與品牌頁，會自動整理成前台內容入口。"
+            color={primaryColor}
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {brandPage ? (
+              <ContentCard
+                href="/about"
+                title={brandPage.title}
+                label="品牌頁"
+                description={brandPage.heroSubtitle}
+                color={primaryColor}
+              />
+            ) : null}
+            {contentPages.slice(0, 5).map((page) => (
+              <ContentCard
+                key={page.id}
+                href={getPublicPageHref(page)}
+                title={page.title}
+                label={pageTypeLabels[page.type as PageTypeValue]}
+                description={page.heroSubtitle}
+                color={primaryColor}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
+  );
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  color
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  color: string;
+}) {
+  return (
+    <div>
+      <p className="text-sm font-semibold uppercase tracking-[0.2em]" style={{ color }}>
+        {eyebrow}
+      </p>
+      <h2 className="mt-3 text-3xl font-bold text-ink">{title}</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">{description}</p>
+    </div>
+  );
+}
+
+function ContentCard({
+  href,
+  title,
+  label,
+  description,
+  color
+}: {
+  href: string;
+  title: string;
+  label: string;
+  description?: string | null;
+  color: string;
+}) {
+  return (
+    <Link href={href} className="rounded-lg border border-line bg-white p-5 shadow-sm hover:border-brand-500">
+      <span className="text-xs font-semibold" style={{ color }}>
+        {label}
+      </span>
+      <h3 className="mt-3 text-lg font-bold text-ink">{title}</h3>
+      {description ? (
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">{description}</p>
+      ) : null}
+    </Link>
   );
 }
 
@@ -146,6 +300,22 @@ async function getPublishedPagesSafely() {
     return await getPublishedNavigationPages();
   } catch {
     return [];
+  }
+}
+
+async function getPublishedProductsSafely() {
+  try {
+    return await getPublishedProducts();
+  } catch {
+    return [];
+  }
+}
+
+async function getPublishedBrandPageSafely() {
+  try {
+    return await getPublishedBrandPage();
+  } catch {
+    return null;
   }
 }
 

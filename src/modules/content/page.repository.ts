@@ -77,6 +77,7 @@ export async function getPublishedNavigationPages() {
       title: true,
       slug: true,
       type: true,
+      heroImageUrl: true,
       heroSubtitle: true
     },
     orderBy: [
