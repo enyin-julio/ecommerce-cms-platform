@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
+import { formatCurrency } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "訂單建立成功"
+  title: "訂單已建立"
 };
 
 const paymentStatusLabels: Record<string, string> = {
@@ -12,8 +13,8 @@ const paymentStatusLabels: Record<string, string> = {
   pending: "付款處理中",
   paid: "已付款",
   failed: "付款失敗",
-  cancelled: "付款取消",
-  expired: "付款逾時",
+  cancelled: "付款已取消",
+  expired: "付款已逾期",
   refunded: "已退款"
 };
 
@@ -48,11 +49,11 @@ export default async function CheckoutSuccessPage({
             ✓
           </div>
           <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-            訂單已建立
+            Order Created
           </p>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink">感謝你的訂購</h1>
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink">訂單已建立</h1>
           <p className="mt-4 text-sm leading-6 text-muted">
-            我們已收到訂單。正式金流與物流尚未啟用時，這筆訂單可作為測試與營運驗證使用。
+            我們已收到你的訂單。正式金流開通前，測試訂單會保持未付款狀態，不會進行真實刷卡或收款。
           </p>
 
           <div className="mt-8 rounded-lg bg-slate-50 p-5 text-left">
@@ -65,12 +66,20 @@ export default async function CheckoutSuccessPage({
               </div>
             ) : null}
             {order ? (
-              <div className="mt-4 flex flex-col justify-between gap-1 border-t border-line pt-4 sm:flex-row">
-                <span className="text-sm text-muted">付款狀態</span>
-                <span className="text-sm font-semibold text-ink" data-testid="checkout-success-payment-status">
-                  {paymentStatusLabels[order.paymentStatus] || order.paymentStatus}
-                </span>
-              </div>
+              <>
+                <div className="mt-4 flex flex-col justify-between gap-1 border-t border-line pt-4 sm:flex-row">
+                  <span className="text-sm text-muted">付款狀態</span>
+                  <span className="text-sm font-semibold text-ink" data-testid="checkout-success-payment-status">
+                    {paymentStatusLabels[order.paymentStatus] || order.paymentStatus}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-col justify-between gap-1 border-t border-line pt-4 sm:flex-row">
+                  <span className="text-sm text-muted">訂單金額</span>
+                  <span className="text-sm font-semibold text-ink">
+                    {formatCurrency(Number(order.total))}
+                  </span>
+                </div>
+              </>
             ) : null}
           </div>
 
@@ -79,7 +88,7 @@ export default async function CheckoutSuccessPage({
               href="/account/orders"
               className="rounded-full border border-line bg-white px-6 py-3 text-sm font-semibold text-ink hover:border-brand-500"
             >
-              查看會員訂單
+              查看我的訂單
             </Link>
             <Link
               href="/products"

@@ -197,10 +197,6 @@ export async function createOrderFromCart(input: CheckoutInput) {
     throw new Error("Cart is empty");
   }
 
-  if (isEcpayProductionBlocked()) {
-    throw new Error("ECPay production is not enabled");
-  }
-
   const unavailableItem = cart.items.find((item) => {
     return !item.product.isPublished || item.quantity < 1 || item.product.stock < item.quantity;
   });
@@ -210,6 +206,7 @@ export async function createOrderFromCart(input: CheckoutInput) {
   }
 
   const totals = calculateCartTotals(cart);
+  const paymentBlocked = isEcpayProductionBlocked();
 
   const order = await prisma.$transaction(async (tx) => {
     const createdOrder = await tx.order.create({
@@ -217,8 +214,8 @@ export async function createOrderFromCart(input: CheckoutInput) {
         merchantId: cart.merchantId,
         userId: input.userId || null,
         status: "pending",
-        paymentStatus: "pending",
-        paymentProvider: process.env.PAYMENT_PROVIDER || "mock",
+        paymentStatus: paymentBlocked ? "unpaid" : "pending",
+        paymentProvider: paymentBlocked ? "manual-test" : process.env.PAYMENT_PROVIDER || "mock",
         customerName: input.customerName,
         customerPhone: input.customerPhone,
         customerEmail: input.customerEmail.toLowerCase(),
@@ -278,6 +275,21 @@ export async function createOrderFromCart(input: CheckoutInput) {
       }
     });
 
+    if (paymentBlocked) {
+      await tx.payment.create({
+        data: {
+          orderId: createdOrder.id,
+          userId: input.userId || null,
+          provider: "manual-test",
+          status: "unpaid",
+          amount: createdOrder.total,
+          currency: "TWD",
+          failureReason:
+            "ECPay production is not enabled; order was created without payment."
+        }
+      });
+    }
+
     await tx.cartItem.deleteMany({
       where: {
         cartId: cart.id
@@ -294,6 +306,12 @@ export async function createOrderFromCart(input: CheckoutInput) {
   });
 
   await clearCartCookie();
+
+  if (paymentBlocked) {
+    return {
+      order
+    };
+  }
 
   const paymentProvider = getPaymentProvider();
   const itemName = cart.items
