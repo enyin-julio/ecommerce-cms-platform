@@ -36,6 +36,35 @@ export async function getPublishedProducts() {
   });
 }
 
+export async function getPublishedProductCategories() {
+  return prisma.category.findMany({
+    where: {
+      products: {
+        some: {
+          isPublished: true
+        }
+      }
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      _count: {
+        select: {
+          products: {
+            where: {
+              isPublished: true
+            }
+          }
+        }
+      }
+    },
+    orderBy: {
+      name: "asc"
+    }
+  });
+}
+
 export async function getPublishedProductBySlug(slug: string) {
   return prisma.product.findFirst({
     where: {
