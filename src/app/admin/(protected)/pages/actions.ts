@@ -16,7 +16,12 @@ const pageSchema = z.object({
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
   heroImageUrl: z.string().optional(),
-  contentBlocks: z.string().min(1),
+  contentTitle: z.string().optional(),
+  contentBody: z.string().optional(),
+  ctaButtonText: z.string().optional(),
+  ctaButtonUrl: z.string().optional(),
+  useAdvancedContentBlocks: z.boolean(),
+  contentBlocksJson: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   isPublished: z.boolean()
@@ -36,6 +41,47 @@ function parseContentBlocks(value: string): Prisma.InputJsonValue {
   }
 }
 
+function buildContentBlocks(data: {
+  contentTitle?: string;
+  contentBody?: string;
+  ctaButtonText?: string;
+  ctaButtonUrl?: string;
+  useAdvancedContentBlocks?: boolean;
+  contentBlocksJson?: string;
+}): Prisma.InputJsonValue {
+  const advancedJson = data.contentBlocksJson?.trim();
+
+  if (data.useAdvancedContentBlocks && advancedJson) {
+    return parseContentBlocks(advancedJson);
+  }
+
+  const blocks: Prisma.InputJsonValue[] = [];
+  const contentTitle = data.contentTitle?.trim();
+  const contentBody = data.contentBody?.trim();
+  const ctaButtonText = data.ctaButtonText?.trim();
+  const ctaButtonUrl = data.ctaButtonUrl?.trim();
+
+  if (contentTitle || contentBody) {
+    blocks.push({
+      type: "text",
+      title: contentTitle || "內容",
+      body: contentBody || ""
+    });
+  }
+
+  if (ctaButtonText || ctaButtonUrl) {
+    blocks.push({
+      type: "cta",
+      title: ctaButtonText || "了解更多",
+      body: "",
+      buttonText: ctaButtonText || "了解更多",
+      buttonUrl: ctaButtonUrl || "/products"
+    });
+  }
+
+  return blocks;
+}
+
 function parsePageForm(formData: FormData) {
   const data = pageSchema.parse({
     merchantId: formData.get("merchantId"),
@@ -45,7 +91,12 @@ function parsePageForm(formData: FormData) {
     heroTitle: formData.get("heroTitle") || undefined,
     heroSubtitle: formData.get("heroSubtitle") || undefined,
     heroImageUrl: formData.get("heroImageUrl") || "",
-    contentBlocks: formData.get("contentBlocks"),
+    contentTitle: formData.get("contentTitle") || undefined,
+    contentBody: formData.get("contentBody") || undefined,
+    ctaButtonText: formData.get("ctaButtonText") || undefined,
+    ctaButtonUrl: formData.get("ctaButtonUrl") || undefined,
+    useAdvancedContentBlocks: formData.get("useAdvancedContentBlocks") === "on",
+    contentBlocksJson: formData.get("contentBlocksJson") || undefined,
     seoTitle: formData.get("seoTitle") || undefined,
     seoDescription: formData.get("seoDescription") || undefined,
     isPublished: formData.get("isPublished") === "on"
@@ -53,7 +104,7 @@ function parsePageForm(formData: FormData) {
 
   return {
     ...data,
-    contentBlocks: parseContentBlocks(data.contentBlocks)
+    contentBlocks: buildContentBlocks(data)
   };
 }
 

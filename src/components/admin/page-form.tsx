@@ -15,8 +15,23 @@ type PageFormProps = {
   submitLabel: string;
 };
 
+type ContentBlock = {
+  type?: string;
+  title?: string;
+  body?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  imageUrl?: string;
+};
+
 export function PageForm({ action, page, merchants, media, submitLabel }: PageFormProps) {
   const selectedMerchantId = page?.merchantId || merchants[0]?.id || "";
+  const contentBlocks = Array.isArray(page?.contentBlocks)
+    ? (page.contentBlocks as ContentBlock[])
+    : [];
+  const primaryTextBlock =
+    contentBlocks.find((block) => block.type === "text") || contentBlocks[0] || {};
+  const ctaBlock = contentBlocks.find((block) => block.type === "cta") || {};
   const mediaOptions = media.map((item) => ({
     id: item.id,
     url: item.url,
@@ -31,7 +46,10 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
       className="space-y-6 rounded-lg border border-line bg-white p-6 shadow-sm"
       data-testid="admin-page-form"
     >
-      <FormSection title="頁面歸屬" description="設定頁面所屬商家與頁面類型，會影響前台顯示位置。">
+      <FormSection
+        title="頁面歸屬"
+        description="選擇這個頁面屬於哪一個商家，以及它在前台要用哪一種頁面型態顯示。"
+      >
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block">
             <span className="text-sm font-semibold text-ink">商家</span>
@@ -64,7 +82,10 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
         </div>
       </FormSection>
 
-      <FormSection title="頁面基本資料" description="網址代號會出現在前台網址中，請使用英文小寫與連字號。">
+      <FormSection
+        title="基本資料"
+        description="頁面標題會顯示在後台列表與前台頁面。網址代號只使用英文小寫、數字與減號。"
+      >
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="頁面標題" name="title" defaultValue={page?.title} required />
           <TextField
@@ -77,7 +98,10 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
         </div>
       </FormSection>
 
-      <FormSection title="Hero 區塊" description="Hero 是前台頁面最上方的主視覺區塊。">
+      <FormSection
+        title="Hero 主視覺"
+        description="頁面最上方的大標題、副標題與圖片。圖片可以貼網址，也可以從媒體庫選擇。"
+      >
         <TextField label="Hero 標題" name="heroTitle" defaultValue={page?.heroTitle || ""} />
         <TextArea
           label="Hero 副標題"
@@ -91,20 +115,73 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
           defaultValue={page?.heroImageUrl || ""}
           media={mediaOptions}
           testId="admin-page-heroImageUrl"
-          helpText="這張圖會顯示在 Landing Page 或內容頁的主視覺區塊。"
+          helpText="可從媒體庫選擇圖片，或直接貼上圖片網址。"
         />
       </FormSection>
 
-      <FormSection title="內容與 SEO" description="第一版先用 JSON 管理內容區塊，之後再升級成拖拉編輯器。">
+      <FormSection
+        title="頁面內容"
+        description="不用寫 JSON。直接填內容標題與內文，系統會自動轉成前台可顯示的內容區塊。"
+      >
+        <TextField
+          label="內容標題"
+          name="contentTitle"
+          defaultValue={primaryTextBlock.title || ""}
+          placeholder="例如：服務說明"
+        />
         <TextArea
-          label="內容區塊 JSON"
-          name="contentBlocks"
-          rows={10}
-          defaultValue={JSON.stringify(page?.contentBlocks || [], null, 2)}
-          required
-          monospace
+          label="內容文字"
+          name="contentBody"
+          rows={8}
+          defaultValue={primaryTextBlock.body || ""}
+          placeholder="直接輸入你想讓前台顯示的文字。換行會保留。"
         />
 
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TextField
+            label="按鈕文字（選填）"
+            name="ctaButtonText"
+            defaultValue={ctaBlock.buttonText || ""}
+            placeholder="例如：查看商品"
+          />
+          <TextField
+            label="按鈕連結（選填）"
+            name="ctaButtonUrl"
+            defaultValue={ctaBlock.buttonUrl || ""}
+            placeholder="例如：/products"
+          />
+        </div>
+
+        <details className="rounded-lg border border-dashed border-line bg-slate-50 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-ink">
+            進階：直接編輯 JSON
+          </summary>
+          <p className="mt-2 text-xs leading-5 text-muted">
+            一般情況不用填。只有需要多段內容、圖片區塊或特殊排版時才使用。
+          </p>
+          <label className="mt-4 flex items-center gap-3 text-sm font-semibold text-ink">
+            <input
+              name="useAdvancedContentBlocks"
+              type="checkbox"
+              className="h-4 w-4 rounded border-line text-brand-600"
+              data-testid="admin-page-useAdvancedContentBlocks"
+            />
+            使用下方 JSON 內容覆蓋一般文字欄位
+          </label>
+          <TextArea
+            label="內容區塊 JSON（進階選填）"
+            name="contentBlocksJson"
+            rows={10}
+            defaultValue={contentBlocks.length > 0 ? JSON.stringify(contentBlocks, null, 2) : ""}
+            monospace
+          />
+        </details>
+      </FormSection>
+
+      <FormSection
+        title="SEO 與發布"
+        description="SEO 標題與描述會提供搜尋引擎使用。勾選發布後，前台才會顯示這個頁面。"
+      >
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="SEO 標題" name="seoTitle" defaultValue={page?.seoTitle || ""} />
           <TextField
@@ -122,7 +199,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
             className="h-4 w-4 rounded border-line text-brand-600"
             data-testid="admin-page-isPublished"
           />
-          發布此頁面
+          發布到前台
         </label>
       </FormSection>
 
