@@ -16,6 +16,10 @@ export async function SiteHeader() {
     getPublicSiteSettingSafely()
   ]);
   const siteName = siteSetting?.siteName || "AIH 品牌商城";
+  const brandPage = pages.find((page) => page.type === PageType.brand);
+  const navPages = pages.filter((page) => page.type !== PageType.brand);
+  const directNavPages = navPages.slice(0, 4);
+  const moreNavPages = navPages.slice(4);
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -34,19 +38,24 @@ export async function SiteHeader() {
         </Link>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-muted">
           <Link className="hover:text-ink" href="/about">
-            品牌介紹
+            {brandPage?.title || "品牌介紹"}
           </Link>
           <Link className="hover:text-ink" href="/products">
             商品
           </Link>
-          {pages.length > 0 ? (
+          {directNavPages.map((page) => (
+            <Link key={page.id} className="hover:text-ink" href={getPublicPageHref(page)}>
+              {page.title}
+            </Link>
+          ))}
+          {moreNavPages.length > 0 ? (
             <details className="group relative">
               <summary className="cursor-pointer list-none hover:text-ink">
-                網站頁面
+                更多頁面
               </summary>
               <div className="absolute left-0 top-8 z-30 w-72 rounded-lg border border-line bg-white p-3 shadow-soft">
                 <div className="grid gap-1">
-                  {pages.map((page) => (
+                  {moreNavPages.map((page) => (
                     <Link
                       key={page.id}
                       href={getPublicPageHref(page)}
