@@ -40,7 +40,7 @@ export async function SiteHeader() {
         </Link>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-muted">
           <Link className="hover:text-ink" href="/about">
-            {brandPage?.title || "關於品牌"}
+            {brandPage?.title || "品牌介紹"}
           </Link>
           <Link className="hover:text-ink" href="/products">
             商品
@@ -101,9 +101,6 @@ export async function SiteHeader() {
               </Link>
             </>
           )}
-          <Link className="hover:text-ink" href="/admin">
-            後台
-          </Link>
         </nav>
       </div>
     </header>
