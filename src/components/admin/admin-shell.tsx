@@ -58,6 +58,8 @@ export function AdminShell({ children, session }: AdminShellProps) {
             <div className="flex items-center gap-3">
               <Link
                 href="/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold hover:border-brand-500"
               >
                 查看前台

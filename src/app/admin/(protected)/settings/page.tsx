@@ -72,6 +72,7 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
         <a
           href="/"
           target="_blank"
+          rel="noopener noreferrer"
           className="rounded-full border border-line bg-white px-6 py-3 text-center text-sm font-semibold text-ink hover:border-brand-500"
         >
           查看前台

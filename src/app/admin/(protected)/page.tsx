@@ -52,6 +52,8 @@ export default async function AdminDashboardPage() {
             </Link>
             <Link
               href="/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700"
             >
               查看前台
