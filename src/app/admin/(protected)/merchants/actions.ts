@@ -9,7 +9,10 @@ import { assertMerchantAccess, requireAdminSession, requireRoles } from "@/lib/r
 
 const merchantSchema = z.object({
   name: z.string().min(1, "請輸入商家名稱"),
-  slug: z.string().min(1, "請輸入網址代號").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "網址代號只能使用英文小寫、數字與減號"),
+  slug: z
+    .string()
+    .min(1, "請輸入網址代號")
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "網址代號只能使用英文小寫、數字與減號"),
   contactEmail: z.string().email("請輸入正確 Email")
 });
 
@@ -68,6 +71,61 @@ export async function updateMerchantAction(merchantId: string, formData: FormDat
 
   revalidateMerchantPaths();
   redirectToMerchants("商家資料已更新。");
+}
+
+export async function deleteMerchantAction(merchantId: string) {
+  await requireRoles(["admin"]);
+
+  const merchant = await prisma.merchant.findUnique({
+    where: {
+      id: merchantId
+    },
+    select: {
+      _count: {
+        select: {
+          users: true,
+          products: true,
+          categories: true,
+          pages: true,
+          media: true,
+          orders: true,
+          carts: true
+        }
+      },
+      siteSetting: {
+        select: {
+          id: true
+        }
+      }
+    }
+  });
+
+  if (!merchant) {
+    return redirectToMerchants("找不到商家資料。");
+  }
+
+  const relatedCount =
+    merchant._count.users +
+    merchant._count.products +
+    merchant._count.categories +
+    merchant._count.pages +
+    merchant._count.media +
+    merchant._count.orders +
+    merchant._count.carts +
+    (merchant.siteSetting ? 1 : 0);
+
+  if (relatedCount > 0) {
+    redirectToMerchants("此商家仍有商品、分類、頁面、訂單、媒體、使用者或網站設定，無法直接刪除。");
+  }
+
+  await prisma.merchant.delete({
+    where: {
+      id: merchantId
+    }
+  });
+
+  revalidateMerchantPaths();
+  redirectToMerchants("商家已刪除。");
 }
 
 function revalidateMerchantPaths() {
