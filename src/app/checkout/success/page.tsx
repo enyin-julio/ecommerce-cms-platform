@@ -33,37 +33,62 @@ export default async function CheckoutSuccessPage({
           id: params.orderId
         },
         select: {
-          paymentStatus: true
+          paymentStatus: true,
+          total: true
         }
       })
     : null;
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-slate-50">
       <SiteHeader />
-      <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-          訂單已建立
-        </p>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink">
-          感謝你的訂購
-        </h1>
-        {params.orderId ? (
-          <p className="mt-4 text-sm text-muted" data-testid="checkout-success-order-id">
-            訂單編號：{params.orderId}
+      <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+        <div className="rounded-lg border border-line bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-2xl font-bold text-emerald-700">
+            ✓
+          </div>
+          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
+            訂單已建立
           </p>
-        ) : null}
-        {order ? (
-          <p className="mt-3 text-sm font-semibold text-ink" data-testid="checkout-success-payment-status">
-            付款狀態：{paymentStatusLabels[order.paymentStatus] || order.paymentStatus}
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink">感謝你的訂購</h1>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            我們已收到訂單。正式金流與物流尚未啟用時，這筆訂單可作為測試與營運驗證使用。
           </p>
-        ) : null}
-        <Link
-          href="/products"
-          className="mt-8 inline-flex rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700"
-        >
-          繼續逛商品
-        </Link>
+
+          <div className="mt-8 rounded-lg bg-slate-50 p-5 text-left">
+            {params.orderId ? (
+              <div className="flex flex-col justify-between gap-1 sm:flex-row">
+                <span className="text-sm text-muted">訂單編號</span>
+                <span className="break-all text-sm font-semibold text-ink" data-testid="checkout-success-order-id">
+                  {params.orderId}
+                </span>
+              </div>
+            ) : null}
+            {order ? (
+              <div className="mt-4 flex flex-col justify-between gap-1 border-t border-line pt-4 sm:flex-row">
+                <span className="text-sm text-muted">付款狀態</span>
+                <span className="text-sm font-semibold text-ink" data-testid="checkout-success-payment-status">
+                  {paymentStatusLabels[order.paymentStatus] || order.paymentStatus}
+                </span>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link
+              href="/account/orders"
+              className="rounded-full border border-line bg-white px-6 py-3 text-sm font-semibold text-ink hover:border-brand-500"
+            >
+              查看會員訂單
+            </Link>
+            <Link
+              href="/products"
+              className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700"
+            >
+              繼續逛商品
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
   );
