@@ -28,7 +28,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   const params = await searchParams;
   const errorMessage =
     params?.error === "payment-not-enabled"
-      ? "正式金流尚未啟用，目前無法完成付款。請先保留商品資料，待金流開通後再進行正式交易。"
+      ? "ECPay production is not enabled。正式金流尚未開啟，請改用測試模式或聯絡系統管理員。"
       : null;
 
   return (
@@ -44,7 +44,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">填寫結帳資料</h1>
           <p className="mt-3 text-sm leading-6 text-muted">
-            請確認收件資訊。送出後系統會建立訂單、重新檢查庫存並重新計算金額。
+            請確認聯絡資訊與配送地址。訂單金額會由系統在後端重新計算，確保資料安全正確。
           </p>
         </div>
 
@@ -73,7 +73,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
                   required
                 />
                 <TextField
-                  label="電話"
+                  label="手機"
                   name="customerPhone"
                   defaultValue={customer?.phone || ""}
                   required
@@ -90,7 +90,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
               </div>
               <div className="mt-5">
                 <TextArea
-                  label="收件地址"
+                  label="配送地址"
                   name="address"
                   defaultValue={customer?.address || ""}
                   required
@@ -101,25 +101,25 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
             <section className="border-t border-line pt-6">
               <h2 className="text-lg font-bold text-ink">訂單備註</h2>
               <div className="mt-5">
-                <TextArea label="備註" name="note" placeholder="可填寫希望出貨前注意的事項。" />
+                <TextArea label="備註" name="note" placeholder="例如希望配送時段或其他注意事項" />
               </div>
             </section>
 
             <section className="border-t border-line pt-6">
-              <h2 className="text-lg font-bold text-ink">付款測試</h2>
+              <h2 className="text-lg font-bold text-ink">付款測試模式</h2>
               <label className="mt-5 block">
-                <span className="text-sm font-semibold text-ink">測試付款結果</span>
+                <span className="text-sm font-semibold text-ink">模擬付款結果</span>
                 <select
                   name="mockPaymentResult"
                   defaultValue="success"
                   className="mt-2 min-h-12 w-full rounded border border-line px-4 text-sm outline-none focus:border-brand-500"
                   data-testid="checkout-mock-payment-result"
                 >
-                  <option value="success">測試付款成功</option>
-                  <option value="failed">測試付款失敗</option>
+                  <option value="success">模擬付款成功</option>
+                  <option value="failed">模擬付款失敗</option>
                 </select>
                 <span className="mt-2 block text-xs leading-5 text-muted">
-                  目前正式金流尚未啟用，這個欄位只供測試訂單流程，不會進行真實刷卡。
+                  目前正式金流尚未啟用，這裡只用於測試訂單流程，不會儲存信用卡資料。
                 </span>
               </label>
             </section>
@@ -152,7 +152,7 @@ function CheckoutSummary({
 }) {
   return (
     <aside className="h-fit rounded-lg border border-line bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-bold text-ink">訂單明細</h2>
+      <h2 className="text-lg font-bold text-ink">訂單摘要</h2>
       {cart && cart.items.length > 0 ? (
         <div className="mt-5 space-y-4">
           {cart.items.map((item) => (
@@ -168,7 +168,7 @@ function CheckoutSummary({
           ))}
         </div>
       ) : (
-        <p className="mt-5 text-sm text-muted">購物車目前沒有商品。</p>
+        <p className="mt-5 text-sm text-muted">購物車目前是空的。</p>
       )}
 
       <div className="mt-6 space-y-3 border-t border-line pt-5">
@@ -178,7 +178,7 @@ function CheckoutSummary({
         </div>
         <div className="flex justify-between text-sm text-muted">
           <span>運費</span>
-          <span>尚未串接物流</span>
+          <span>尚未計算</span>
         </div>
         <div className="flex justify-between text-base font-bold text-ink">
           <span>總金額</span>
@@ -186,7 +186,7 @@ function CheckoutSummary({
         </div>
       </div>
       <p className="mt-4 rounded-lg bg-slate-50 p-3 text-xs leading-5 text-muted">
-        送出訂單後會扣庫存並建立訂單。正式金流與物流仍維持關閉，避免誤觸真實交易。
+        送出訂單後，系統會建立訂單與付款紀錄。正式金流開通前，請只建立 TEST 測試訂單。
       </p>
     </aside>
   );
