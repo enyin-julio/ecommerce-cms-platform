@@ -32,12 +32,12 @@ function parseContentBlocks(value: string): Prisma.InputJsonValue {
     const parsed = JSON.parse(value);
 
     if (!Array.isArray(parsed)) {
-      throw new Error("contentBlocks must be an array");
+      throw new Error("Content blocks must be an array");
     }
 
     return parsed as Prisma.InputJsonValue;
   } catch {
-    throw new Error("Invalid contentBlocks JSON");
+    throw new Error("Invalid content blocks");
   }
 }
 

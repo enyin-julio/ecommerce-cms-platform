@@ -49,16 +49,14 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
 
   const serializedBlocks = useMemo(() => {
     return JSON.stringify(
-      blocks.map(({ type, title, body, imageUrl, buttonText, buttonUrl }) => {
-        return {
-          type,
-          ...(title.trim() ? { title: title.trim() } : {}),
-          ...(body.trim() ? { body: body.trim() } : {}),
-          ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
-          ...(buttonText.trim() ? { buttonText: buttonText.trim() } : {}),
-          ...(buttonUrl.trim() ? { buttonUrl: buttonUrl.trim() } : {})
-        };
-      })
+      blocks.map(({ type, title, body, imageUrl, buttonText, buttonUrl }) => ({
+        type,
+        ...(title.trim() ? { title: title.trim() } : {}),
+        ...(body.trim() ? { body: body.trim() } : {}),
+        ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
+        ...(buttonText.trim() ? { buttonText: buttonText.trim() } : {}),
+        ...(buttonUrl.trim() ? { buttonUrl: buttonUrl.trim() } : {})
+      }))
     );
   }, [blocks]);
 
@@ -132,7 +130,7 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
                 <p className="text-sm font-bold text-ink">
                   {index + 1}. {blockTypeLabels[block.type]}
                 </p>
-                <p className="mt-1 text-xs text-muted">可拖拉這張卡片調整前台顯示順序。</p>
+                <p className="mt-1 text-xs text-muted">拖曳卡片可調整前台顯示順序。</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <SmallButton
@@ -162,7 +160,7 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
                   label="內文"
                   value={block.body}
                   onChange={(value) => updateBlock(index, { body: value })}
-                  placeholder="直接輸入前台要顯示的內容。換行會保留。"
+                  placeholder="直接輸入前台要顯示的內容，換行會保留。"
                 />
               ) : null}
 
@@ -230,21 +228,25 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
 
 function normalizeBlocks(blocks: EditableContentBlock[]) {
   const normalized = blocks
-    .filter((block) => block && typeof block === "object")
+    .filter((block) => block && typeof block === "object" && !Array.isArray(block))
     .map((block) => {
       const type = normalizeBlockType(block.type);
       return {
         id: createId(),
         type,
-        title: block.title || "",
-        body: block.body || "",
-        imageUrl: block.imageUrl || "",
-        buttonText: block.buttonText || "",
-        buttonUrl: block.buttonUrl || ""
+        title: normalizeText(block.title),
+        body: normalizeText(block.body),
+        imageUrl: normalizeText(block.imageUrl),
+        buttonText: normalizeText(block.buttonText),
+        buttonUrl: normalizeText(block.buttonUrl)
       };
     });
 
   return normalized.length > 0 ? normalized : [createEmptyBlock("text")];
+}
+
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value : "";
 }
 
 function normalizeBlockType(type?: string): BlockType {

@@ -40,7 +40,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
     >
       <FormSection
         title="頁面歸屬"
-        description="選擇這個頁面屬於哪一個商家，以及前台要用哪一種頁面型態顯示。"
+        description="選擇頁面所屬商家，以及前台要使用的頁面型態。"
       >
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block">
