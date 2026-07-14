@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
+import { MediaImageField } from "@/components/admin/media-image-field";
 import { updateSiteSettingAction } from "@/app/admin/(protected)/settings/actions";
 import { requireAdminSession } from "@/lib/rbac";
 import { getAdminMerchants } from "@/modules/catalog/product.repository";
@@ -19,8 +20,6 @@ type AdminSettingsPageProps = {
   }>;
 };
 
-type MediaItem = Awaited<ReturnType<typeof getAdminMedia>>[number];
-
 export default async function AdminSettingsPage({ searchParams }: AdminSettingsPageProps) {
   const params = await searchParams;
   const session = await requireAdminSession();
@@ -36,6 +35,13 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
   const logoMedia = media.filter((item) => {
     return selectedMerchant ? item.merchantId === selectedMerchant.id : true;
   });
+  const logoMediaOptions = logoMedia.map((item) => ({
+    id: item.id,
+    url: item.url,
+    altText: item.altText,
+    fileName: item.fileName,
+    merchantName: item.merchant.name
+  }));
   const siteName = setting?.siteName || selectedMerchant?.name || "";
   const logoUrl = setting?.logoUrl || "";
   const primaryColor = setting?.primaryColor || "#2563eb";
@@ -154,31 +160,13 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
               required
             />
 
-            <label className="block">
-              <span className="text-sm font-semibold text-ink">從媒體庫選擇 Logo</span>
-              <select
-                name="logoUrl"
-                defaultValue={logoUrl}
-                className="mt-2 min-h-12 w-full rounded border border-line px-4 text-sm outline-none focus:border-brand-500"
-                data-testid="admin-settings-logoUrl"
-              >
-                <option value="">不使用媒體庫圖片</option>
-                {logoMedia.map((item) => (
-                  <option key={item.id} value={item.url}>
-                    {getMediaLabel(item)}
-                  </option>
-                ))}
-              </select>
-              <span className="mt-2 block text-xs text-muted">
-                如果下拉選單沒有圖片，請先到「媒體庫」上傳 Logo。
-              </span>
-            </label>
-
-            <TextField
-              label="手動貼上 Logo URL"
-              name="logoUrlManual"
+            <MediaImageField
+              name="logoUrl"
+              label="Logo 圖片 URL"
               defaultValue={logoUrl}
-              placeholder="例如：https://..."
+              media={logoMediaOptions}
+              testId="admin-settings-logoUrl"
+              helpText="Logo 會顯示在前台導覽列，建議使用透明背景 PNG 或 WebP。"
             />
           </SettingsSection>
 
@@ -240,10 +228,6 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
       </div>
     </div>
   );
-}
-
-function getMediaLabel(item: MediaItem) {
-  return item.altText || item.fileName || item.url;
 }
 
 function SettingsSection({
