@@ -35,7 +35,12 @@ export default async function AdminDashboardPage() {
             <p className="text-sm font-semibold text-muted">電商網站</p>
             <h3 className="mt-2 text-2xl font-bold text-ink">{siteName}</h3>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted">
-              <Link href={siteUrl} className="font-semibold text-brand-700 hover:text-brand-800">
+              <Link
+                href={siteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-700 hover:text-brand-800"
+              >
                 {siteUrl}
               </Link>
               <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
