@@ -6,8 +6,8 @@ import { getPublishedNavigationPages } from "@/modules/content/page.repository";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 
 const pageTypeLabels: Record<PageTypeValue, string> = {
-  brand: "品牌",
-  landing: "形象頁",
+  brand: "品牌介紹",
+  landing: "活動頁",
   content: "內容頁"
 };
 
