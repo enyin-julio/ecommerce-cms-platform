@@ -26,7 +26,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div
         className="aspect-[4/3] bg-cover bg-center"
         style={{
-          backgroundImage: `url(${product.imageUrl || productImagePlaceholder})`
+          backgroundImage: `url("${product.imageUrl || productImagePlaceholder}")`
         }}
       />
       <div className="space-y-3 p-5">
