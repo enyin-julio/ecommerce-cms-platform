@@ -8,6 +8,7 @@ const navItems = [
   { href: "/admin/settings", label: "網站設定" },
   { href: "/admin/pages", label: "頁面管理" },
   { href: "/admin/products", label: "商品管理" },
+  { href: "/admin/categories", label: "商品分類" },
   { href: "/admin/media", label: "媒體庫" },
   { href: "/admin/orders", label: "訂單管理" }
 ];

@@ -110,3 +110,25 @@ export async function getAdminCategories(session: AdminSession) {
     }
   });
 }
+
+export async function getAdminCategoriesWithProductCount(session: AdminSession) {
+  return prisma.category.findMany({
+    where:
+      session.role === "merchant" && session.merchantId
+        ? {
+            merchantId: session.merchantId
+          }
+        : undefined,
+    include: {
+      merchant: true,
+      _count: {
+        select: {
+          products: true
+        }
+      }
+    },
+    orderBy: {
+      updatedAt: "desc"
+    }
+  });
+}

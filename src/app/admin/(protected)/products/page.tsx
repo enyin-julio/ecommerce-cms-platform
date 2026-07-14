@@ -70,7 +70,9 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
           <span className="border-b-2 border-amber-500 pb-3 text-sm font-semibold text-ink">
             商品總覽
           </span>
-          <span className="pb-3 text-sm font-semibold text-muted">商品分類</span>
+          <Link href="/admin/categories" className="pb-3 text-sm font-semibold text-muted hover:text-ink">
+            商品分類
+          </Link>
         </div>
 
         <form className="mt-6 space-y-4" action="/admin/products" data-testid="admin-product-filter-form">
