@@ -112,11 +112,7 @@ export async function GET(request: NextRequest) {
 
   const shouldExpandItems = fields.some((field) => itemFields.has(field));
   const rows = orders.flatMap((order) => {
-    if (!shouldExpandItems) {
-      return [buildCsvRow(fields, order, null)];
-    }
-
-    if (order.items.length === 0) {
+    if (!shouldExpandItems || order.items.length === 0) {
       return [buildCsvRow(fields, order, null)];
     }
 
