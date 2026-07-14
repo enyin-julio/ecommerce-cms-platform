@@ -197,15 +197,26 @@ await check("建立 TEST 訂單", async () => {
   }
 
   await page.click("[data-testid='place-order']");
-  await page.waitForLoadState("domcontentloaded", { timeout: 30000 });
+  await page
+    .waitForURL(
+      (url) =>
+        url.pathname === "/checkout/success" ||
+        url.pathname.startsWith("/checkout/payment/"),
+      { timeout: 30000 }
+    )
+    .catch(() => null);
 
-  if (!/\/checkout\/(success|payment)/.test(page.url())) {
+  const currentUrl = new URL(page.url());
+  if (
+    currentUrl.pathname !== "/checkout/success" &&
+    !currentUrl.pathname.startsWith("/checkout/payment/")
+  ) {
     const checkoutError = await page
       .locator("[data-testid='checkout-error']")
       .textContent()
       .catch(() => "");
     throw new Error(
-      `送出後不是成功或付款頁：${page.url()} ${checkoutError || ""}`.trim()
+      `送出後不是成功或付款頁：${currentUrl.href} ${checkoutError || ""}`.trim()
     );
   }
 });
