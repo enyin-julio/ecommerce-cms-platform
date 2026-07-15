@@ -22,10 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteSetting = await getPublicSiteSettingSafely();
 
   return {
-    title: siteSetting?.seoTitle || siteSetting?.siteName || "AIH 品牌商城",
+    title: siteSetting?.seoTitle || siteSetting?.siteName || "UZEEK 品牌商城",
     description:
       siteSetting?.seoDescription ||
-      "探索 AIH 品牌商城的精選商品、品牌故事與最新活動。"
+      "探索 UZEEK 品牌商城的精選商品、品牌故事與最新活動。"
   };
 }
 
@@ -36,7 +36,7 @@ export default async function HomePage() {
     getPublishedBrandPageSafely(),
     getPublicSiteSettingSafely()
   ]);
-  const siteName = siteSetting?.siteName || "AIH 品牌商城";
+  const siteName = siteSetting?.siteName || "UZEEK 品牌商城";
   const primaryColor = siteSetting?.primaryColor || "#2563eb";
   const heroTitle = brandPage?.heroTitle || siteName;
   const heroDescription =

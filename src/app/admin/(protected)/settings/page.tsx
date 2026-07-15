@@ -127,14 +127,14 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
               label="網站名稱"
               name="siteName"
               defaultValue={siteName}
-              placeholder="例如：AIH 品牌商城"
+              placeholder="例如：UZEEK 品牌商城"
               required
             />
             <TextField
               label="SEO 標題"
               name="seoTitle"
               defaultValue={setting?.seoTitle || ""}
-              placeholder="例如：AIH 智慧生活品牌商城"
+              placeholder="例如：UZEEK 智慧生活品牌商城"
             />
             <label className="block">
               <span className="text-sm font-semibold text-ink">SEO 描述</span>

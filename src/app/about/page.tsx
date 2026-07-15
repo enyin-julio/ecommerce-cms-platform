@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       page?.seoDescription ||
       page?.heroSubtitle ||
-      "了解 AIH 品牌商城的品牌理念、網站內容與電商服務。"
+      "了解 UZEEK 品牌商城的品牌理念、商品與服務。"
   };
 }
 

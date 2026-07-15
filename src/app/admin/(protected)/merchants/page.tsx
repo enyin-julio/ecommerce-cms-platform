@@ -78,7 +78,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
             網址代號用於系統辨識，建議使用英文小寫與減號，例如 aih-brand。
           </p>
           <form action={createMerchantAction} className="mt-6 grid gap-5 lg:grid-cols-[1fr_1fr_1fr_auto]">
-            <TextField label="商家名稱" name="name" placeholder="例如：AIH 品牌商城" required />
+            <TextField label="商家名稱" name="name" placeholder="例如：UZEEK 品牌商城" required />
             <TextField label="網址代號（Slug）" name="slug" placeholder="例如：aih-brand" required />
             <TextField label="聯絡 Email" name="contactEmail" type="email" placeholder="service@example.com" required />
             <div className="flex items-end">

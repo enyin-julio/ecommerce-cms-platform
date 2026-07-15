@@ -17,7 +17,7 @@ export async function SiteHeader() {
     getPublicSiteSettingSafely(),
     getCurrentCustomerSafely()
   ]);
-  const siteName = siteSetting?.siteName || "AIH 品牌商城";
+  const siteName = siteSetting?.siteName || "UZEEK 品牌商城";
   const brandPage = pages.find((page) => page.type === PageType.brand);
   const navPages = pages.filter((page) => page.type !== PageType.brand);
   const directNavPages = navPages.slice(0, 4);

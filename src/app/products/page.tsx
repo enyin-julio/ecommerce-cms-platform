@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "商品列表",
-  description: "瀏覽 AIH 品牌商城目前已上架的商品。"
+  description: "瀏覽 UZEEK 品牌商城目前已上架的商品。"
 };
 
 type ProductsPageProps = {
