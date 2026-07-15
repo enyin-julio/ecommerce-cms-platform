@@ -13,9 +13,9 @@ import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository
 export const dynamic = "force-dynamic";
 
 const pageTypeLabels: Record<PageTypeValue, string> = {
-  brand: "品牌頁",
-  landing: "形象廣告頁",
-  content: "內容頁"
+  brand: "品牌介紹",
+  landing: "最新活動",
+  content: "服務資訊"
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: siteSetting?.seoTitle || siteSetting?.siteName || "AIH 品牌商城",
     description:
       siteSetting?.seoDescription ||
-      "AIH 品牌商城提供品牌內容、商品型錄與電商購物體驗。"
+      "探索 AIH 品牌商城的精選商品、品牌故事與最新活動。"
   };
 }
 
@@ -42,7 +42,7 @@ export default async function HomePage() {
   const heroDescription =
     brandPage?.heroSubtitle ||
     siteSetting?.seoDescription ||
-    "用一套後台管理品牌內容、商品型錄、購物流程與訂單營運。";
+    "精選實用商品與品牌服務，提供安心、清楚、便利的購物體驗。";
   const heroImageUrl = brandPage?.heroImageUrl || siteSetting?.logoUrl || "";
   const landingPages = pages.filter((page) => page.type === PageType.landing);
   const contentPages = pages.filter((page) => page.type !== PageType.brand);
@@ -59,7 +59,7 @@ export default async function HomePage() {
               className="text-sm font-semibold uppercase tracking-[0.2em]"
               style={{ color: primaryColor }}
             >
-              品牌電商 CMS
+              精選品牌商城
             </p>
             <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-ink sm:text-6xl">
               {heroTitle}
@@ -98,7 +98,7 @@ export default async function HomePage() {
                   >
                     {siteName.slice(0, 1)}
                   </div>
-                  <p className="mt-5 text-sm text-muted">可在後台網站設定或品牌頁加入首頁主視覺。</p>
+                  <p className="mt-5 text-sm text-muted">歡迎探索我們的精選商品與品牌服務。</p>
                 </div>
               </div>
             )}
@@ -109,9 +109,9 @@ export default async function HomePage() {
       {landingPages.length > 0 ? (
         <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
           <SectionHeading
-            eyebrow="形象廣告"
-            title="最新活動與品牌主題"
-            description="後台發布的形象廣告頁會自動出現在這裡。"
+            eyebrow="最新消息"
+            title="活動與品牌主題"
+            description="掌握近期活動、品牌企劃與精選推薦。"
             color={primaryColor}
           />
           <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -153,8 +153,8 @@ export default async function HomePage() {
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <SectionHeading
                 eyebrow="精選商品"
-                title="後台上架商品"
-                description="已上架商品會自動出現在前台，這裡先顯示最新三筆。"
+                title="值得推薦的商品"
+                description="為你整理近期精選商品，快速找到適合的選擇。"
                 color={primaryColor}
               />
               <Link
@@ -180,7 +180,7 @@ export default async function HomePage() {
                     />
                   ) : (
                     <div className="grid aspect-[4/3] place-items-center bg-white text-sm text-muted">
-                      尚未設定商品圖片
+                      商品圖片準備中
                     </div>
                   )}
                   <div className="p-5">
@@ -203,9 +203,9 @@ export default async function HomePage() {
       {brandPage || contentPages.length > 0 ? (
         <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
           <SectionHeading
-            eyebrow="網站內容"
-            title="品牌與服務資訊"
-            description="後台發布的一般內容頁與品牌頁，會自動整理成前台內容入口。"
+            eyebrow="了解更多"
+            title="品牌與服務"
+            description="查看品牌故事、服務說明與購物相關資訊。"
             color={primaryColor}
           />
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -213,7 +213,7 @@ export default async function HomePage() {
               <ContentCard
                 href="/about"
                 title={brandPage.title}
-                label="品牌頁"
+                label="品牌介紹"
                 description={brandPage.heroSubtitle}
                 color={primaryColor}
               />
