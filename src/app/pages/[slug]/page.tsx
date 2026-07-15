@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CmsPageContent } from "@/components/public/cms-page-content";
 import { SiteHeader } from "@/components/public/site-header";
+import {
+  getHeroStyleFromBlocks,
+  getHeroSubtitleStyle,
+  getHeroTitleStyle
+} from "@/lib/cms-hero-style";
 import { PageType } from "@/lib/domain-types";
 import { productImagePlaceholder } from "@/lib/placeholders";
 import { getPublishedPageBySlug } from "@/modules/content/page.repository";
@@ -40,6 +45,8 @@ export default async function PublicContentPage({ params }: PublicContentPagePro
     notFound();
   }
 
+  const heroStyle = getHeroStyleFromBlocks(page.contentBlocks);
+
   return (
     <main className="min-h-screen bg-slate-50">
       <SiteHeader />
@@ -53,11 +60,17 @@ export default async function PublicContentPage({ params }: PublicContentPagePro
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
             {page.type === PageType.brand ? "品牌頁" : "內容頁"}
           </p>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+          <h1
+            className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl"
+            style={getHeroTitleStyle(heroStyle)}
+          >
             {page.heroTitle || page.title}
           </h1>
           {page.heroSubtitle ? (
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">
+            <p
+              className="mt-6 max-w-3xl text-lg leading-8 text-muted"
+              style={getHeroSubtitleStyle(heroStyle)}
+            >
               {page.heroSubtitle}
             </p>
           ) : null}

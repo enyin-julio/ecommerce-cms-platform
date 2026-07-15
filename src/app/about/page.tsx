@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { CmsPageContent } from "@/components/public/cms-page-content";
 import { SiteHeader } from "@/components/public/site-header";
+import {
+  getHeroStyleFromBlocks,
+  getHeroSubtitleStyle,
+  getHeroTitleStyle
+} from "@/lib/cms-hero-style";
 import { productImagePlaceholder } from "@/lib/placeholders";
 import { getPublishedBrandPage } from "@/modules/content/page.repository";
 
@@ -22,6 +27,8 @@ export default async function AboutPage() {
   const page = await getBrandPageSafely();
 
   if (page) {
+    const heroStyle = getHeroStyleFromBlocks(page.contentBlocks);
+
     return (
       <main className="min-h-screen bg-white">
         <SiteHeader />
@@ -35,11 +42,17 @@ export default async function AboutPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
               品牌介紹
             </p>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+            <h1
+              className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl"
+              style={getHeroTitleStyle(heroStyle)}
+            >
               {page.heroTitle || page.title}
             </h1>
             {page.heroSubtitle ? (
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">
+              <p
+                className="mt-6 max-w-3xl text-lg leading-8 text-muted"
+                style={getHeroSubtitleStyle(heroStyle)}
+              >
                 {page.heroSubtitle}
               </p>
             ) : null}

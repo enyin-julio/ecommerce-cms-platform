@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import type { JsonValue } from "@prisma/client/runtime/library";
 import Link from "next/link";
+import { removeHeroStyleBlocks } from "@/lib/cms-hero-style";
 
 type ContentBlock = {
   type?: string;
@@ -16,7 +17,9 @@ type CmsPageContentProps = {
 };
 
 export function CmsPageContent({ blocks }: CmsPageContentProps) {
-  const contentBlocks = Array.isArray(blocks) ? (blocks as ContentBlock[]) : [];
+  const contentBlocks = Array.isArray(blocks)
+    ? removeHeroStyleBlocks(blocks as ContentBlock[])
+    : [];
 
   if (contentBlocks.length === 0) {
     return null;

@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { createHeroStyleBlock } from "@/lib/cms-hero-style";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
 import { prisma } from "@/lib/prisma";
 import { assertMerchantAccess, denyAccess, requireAdminSession } from "@/lib/rbac";
@@ -16,6 +17,10 @@ const pageSchema = z.object({
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
   heroImageUrl: z.string().optional(),
+  heroTitleFontFamily: z.string().optional(),
+  heroTitleFontSize: z.string().optional(),
+  heroSubtitleFontFamily: z.string().optional(),
+  heroSubtitleFontSize: z.string().optional(),
   contentTitle: z.string().optional(),
   contentBody: z.string().optional(),
   ctaButtonText: z.string().optional(),
@@ -48,11 +53,15 @@ function buildContentBlocks(data: {
   ctaButtonUrl?: string;
   useAdvancedContentBlocks?: boolean;
   contentBlocksJson?: string;
+  heroTitleFontFamily?: string;
+  heroTitleFontSize?: string;
+  heroSubtitleFontFamily?: string;
+  heroSubtitleFontSize?: string;
 }): Prisma.InputJsonValue {
   const advancedJson = data.contentBlocksJson?.trim();
 
   if (data.useAdvancedContentBlocks && advancedJson) {
-    return parseContentBlocks(advancedJson);
+    return withHeroStyleBlock(parseContentBlocks(advancedJson), data);
   }
 
   const blocks: Prisma.InputJsonValue[] = [];
@@ -79,7 +88,7 @@ function buildContentBlocks(data: {
     });
   }
 
-  return blocks;
+  return withHeroStyleBlock(blocks, data);
 }
 
 function parsePageForm(formData: FormData) {
@@ -91,6 +100,10 @@ function parsePageForm(formData: FormData) {
     heroTitle: formData.get("heroTitle") || undefined,
     heroSubtitle: formData.get("heroSubtitle") || undefined,
     heroImageUrl: formData.get("heroImageUrl") || "",
+    heroTitleFontFamily: formData.get("heroTitleFontFamily") || undefined,
+    heroTitleFontSize: formData.get("heroTitleFontSize") || undefined,
+    heroSubtitleFontFamily: formData.get("heroSubtitleFontFamily") || undefined,
+    heroSubtitleFontSize: formData.get("heroSubtitleFontSize") || undefined,
     contentTitle: formData.get("contentTitle") || undefined,
     contentBody: formData.get("contentBody") || undefined,
     ctaButtonText: formData.get("ctaButtonText") || undefined,
@@ -106,6 +119,36 @@ function parsePageForm(formData: FormData) {
     ...data,
     contentBlocks: buildContentBlocks(data)
   };
+}
+
+function withHeroStyleBlock(
+  blocks: Prisma.InputJsonValue,
+  data: {
+    heroTitleFontFamily?: string;
+    heroTitleFontSize?: string;
+    heroSubtitleFontFamily?: string;
+    heroSubtitleFontSize?: string;
+  }
+): Prisma.InputJsonValue {
+  const contentBlocks = Array.isArray(blocks)
+    ? blocks.filter((block) => {
+        return !(
+          block &&
+          typeof block === "object" &&
+          !Array.isArray(block) &&
+          "type" in block &&
+          block.type === "heroStyle"
+        );
+      })
+    : [];
+  const heroStyleBlock = createHeroStyleBlock({
+    titleFontFamily: data.heroTitleFontFamily,
+    titleFontSize: data.heroTitleFontSize,
+    subtitleFontFamily: data.heroSubtitleFontFamily,
+    subtitleFontSize: data.heroSubtitleFontSize
+  });
+
+  return heroStyleBlock ? [heroStyleBlock, ...contentBlocks] : contentBlocks;
 }
 
 function revalidateCmsPagePaths(type: PageTypeValue, slug: string) {

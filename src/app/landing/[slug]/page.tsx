@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CmsPageContent } from "@/components/public/cms-page-content";
 import { SiteHeader } from "@/components/public/site-header";
+import {
+  getHeroStyleFromBlocks,
+  getHeroSubtitleStyle,
+  getHeroTitleStyle
+} from "@/lib/cms-hero-style";
 import { PageType } from "@/lib/domain-types";
 import { productImagePlaceholder } from "@/lib/placeholders";
 import { getPublishedPageBySlug } from "@/modules/content/page.repository";
@@ -36,6 +41,8 @@ export default async function LandingPage({ params }: LandingPageProps) {
     notFound();
   }
 
+  const heroStyle = getHeroStyleFromBlocks(page.contentBlocks);
+
   return (
     <main className="min-h-screen bg-white">
       <SiteHeader />
@@ -49,11 +56,17 @@ export default async function LandingPage({ params }: LandingPageProps) {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
             形象廣告頁 / {page.slug}
           </p>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-6xl">
+          <h1
+            className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-6xl"
+            style={getHeroTitleStyle(heroStyle)}
+          >
             {page.heroTitle || page.title}
           </h1>
           {page.heroSubtitle ? (
-            <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-muted">
+            <p
+              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-muted"
+              style={getHeroSubtitleStyle(heroStyle)}
+            >
               {page.heroSubtitle}
             </p>
           ) : null}

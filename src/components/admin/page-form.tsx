@@ -5,6 +5,13 @@ import {
   type EditableContentBlock
 } from "@/components/admin/content-block-editor";
 import { MediaImageField } from "@/components/admin/media-image-field";
+import {
+  getHeroStyleFromBlocks,
+  heroFontFamilyOptions,
+  heroSubtitleFontSizeOptions,
+  heroTitleFontSizeOptions,
+  removeHeroStyleBlocks
+} from "@/lib/cms-hero-style";
 import { PageType } from "@/lib/domain-types";
 
 type PageWithMerchant = Page & {
@@ -22,8 +29,9 @@ type PageFormProps = {
 export function PageForm({ action, page, merchants, media, submitLabel }: PageFormProps) {
   const selectedMerchantId = page?.merchantId || merchants[0]?.id || "";
   const contentBlocks = Array.isArray(page?.contentBlocks)
-    ? (page.contentBlocks as EditableContentBlock[])
+    ? removeHeroStyleBlocks(page.contentBlocks as EditableContentBlock[])
     : [];
+  const heroStyle = getHeroStyleFromBlocks(page?.contentBlocks || []);
   const mediaOptions = media.map((item) => ({
     id: item.id,
     url: item.url,
@@ -109,6 +117,32 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
           testId="admin-page-heroImageUrl"
           helpText="可從媒體庫選擇圖片，或直接貼上圖片網址。"
         />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <SelectField
+            label="Hero 標題字型"
+            name="heroTitleFontFamily"
+            defaultValue={heroStyle.titleFontFamily || "system"}
+            options={heroFontFamilyOptions}
+          />
+          <SelectField
+            label="Hero 標題大小"
+            name="heroTitleFontSize"
+            defaultValue={heroStyle.titleFontSize || ""}
+            options={heroTitleFontSizeOptions}
+          />
+          <SelectField
+            label="Hero 副標題字型"
+            name="heroSubtitleFontFamily"
+            defaultValue={heroStyle.subtitleFontFamily || "system"}
+            options={heroFontFamilyOptions}
+          />
+          <SelectField
+            label="Hero 副標題大小"
+            name="heroSubtitleFontSize"
+            defaultValue={heroStyle.subtitleFontSize || ""}
+            options={heroSubtitleFontSizeOptions}
+          />
+        </div>
       </FormSection>
 
       <FormSection
@@ -223,6 +257,36 @@ function TextArea({
         data-testid={`admin-page-${name}`}
         {...props}
       />
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  name,
+  defaultValue,
+  options
+}: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  options: ReadonlyArray<{ label: string; value: string }>;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-semibold text-ink">{label}</span>
+      <select
+        name={name}
+        defaultValue={defaultValue || ""}
+        className="mt-2 min-h-12 w-full rounded border border-line px-4 text-sm outline-none focus:border-brand-500"
+        data-testid={`admin-page-${name}`}
+      >
+        {options.map((option) => (
+          <option key={option.value || "default"} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }

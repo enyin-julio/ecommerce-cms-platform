@@ -2,6 +2,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
 import { formatCurrency } from "@/lib/format";
+import {
+  getHeroStyleFromBlocks,
+  getHeroSubtitleStyle,
+  getHeroTitleStyle
+} from "@/lib/cms-hero-style";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
 import { getPublishedProducts } from "@/modules/catalog/product.repository";
 import {
@@ -44,6 +49,7 @@ export default async function HomePage() {
     siteSetting?.seoDescription ||
     "精選實用商品與品牌服務，提供安心、清楚、便利的購物體驗。";
   const heroImageUrl = brandPage?.heroImageUrl || siteSetting?.logoUrl || "";
+  const heroStyle = getHeroStyleFromBlocks(brandPage?.contentBlocks || []);
   const landingPages = pages.filter((page) => page.type === PageType.landing);
   const contentPages = pages.filter((page) => page.type !== PageType.brand);
   const featuredProducts = products.slice(0, 3);
@@ -61,10 +67,18 @@ export default async function HomePage() {
             >
               精選品牌商城
             </p>
-            <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-ink sm:text-6xl">
+            <h1
+              className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-ink sm:text-6xl"
+              style={getHeroTitleStyle(heroStyle)}
+            >
               {heroTitle}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">{heroDescription}</p>
+            <p
+              className="mt-6 max-w-2xl text-lg leading-8 text-muted"
+              style={getHeroSubtitleStyle(heroStyle)}
+            >
+              {heroDescription}
+            </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/products"
