@@ -10,18 +10,33 @@ import { assertMerchantAccess, denyAccess, requireAdminSession } from "@/lib/rba
 const categorySchema = z.object({
   merchantId: z.string().min(1),
   name: z.string().min(1, "請輸入分類名稱"),
-  slug: z.string().min(1).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "網址代號只能使用英文小寫、數字與連字號")
+  slug: z.string().min(1).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "網址代號只能使用英文、數字與連字號")
 });
 
-function parseCategoryForm(formData: FormData) {
-  return categorySchema.parse({
-    merchantId: formData.get("merchantId"),
-    name: formData.get("name"),
-    slug: formData.get("slug")
-  });
+function normalizeSlug(value: FormDataEntryValue | null) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
-function redirectToCategories(message: string) {
+function parseCategoryForm(formData: FormData) {
+  const parsed = categorySchema.safeParse({
+    merchantId: formData.get("merchantId"),
+    name: formData.get("name"),
+    slug: normalizeSlug(formData.get("slug"))
+  });
+
+  if (!parsed.success) {
+    redirectToCategories(parsed.error.issues[0]?.message || "請確認分類資料是否正確。");
+  }
+
+  return parsed.data;
+}
+
+function redirectToCategories(message: string): never {
   redirect(`/admin/categories?message=${encodeURIComponent(message)}`);
 }
 
