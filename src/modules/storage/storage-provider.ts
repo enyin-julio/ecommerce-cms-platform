@@ -15,9 +15,15 @@ export type PutObjectInput = {
   body: ArrayBuffer;
 };
 
+export type DeleteObjectInput = {
+  pathname?: string | null;
+  url?: string | null;
+};
+
 export interface StorageProvider {
   readonly provider: StorageProviderName;
   putObject(input: PutObjectInput): Promise<StoredObject>;
+  deleteObject(input: DeleteObjectInput): Promise<void>;
 }
 
 export function sanitizeStorageFilename(filename: string) {

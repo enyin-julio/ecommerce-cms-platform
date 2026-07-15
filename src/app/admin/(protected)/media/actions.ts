@@ -60,3 +60,37 @@ export async function uploadMediaAction(formData: FormData) {
   revalidatePath("/admin/media");
   redirect("/admin/media");
 }
+
+export async function deleteMediaAction(mediaId: string) {
+  const session = await requireAdminSession();
+  const media = await prisma.media.findUnique({
+    where: {
+      id: mediaId
+    }
+  });
+
+  if (!media) {
+    redirect("/admin/media");
+  }
+
+  assertMerchantAccess(session, media.merchantId);
+
+  const storageProvider = getStorageProvider();
+
+  await storageProvider.deleteObject({
+    pathname: media.pathname,
+    url: media.url
+  });
+
+  await prisma.media.delete({
+    where: {
+      id: media.id
+    }
+  });
+
+  revalidatePath("/admin/media");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/pages");
+  revalidatePath("/admin/settings");
+  redirect("/admin/media");
+}

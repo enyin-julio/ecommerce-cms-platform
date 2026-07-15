@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { uploadMediaAction } from "@/app/admin/(protected)/media/actions";
+import { deleteMediaAction, uploadMediaAction } from "@/app/admin/(protected)/media/actions";
 import { requireAdminSession } from "@/lib/rbac";
 import { getAdminMerchants } from "@/modules/catalog/product.repository";
 import { getAdminMedia } from "@/modules/media/media.repository";
@@ -26,6 +26,9 @@ export default async function AdminMediaPage() {
         <h2 className="mt-2 text-2xl font-bold text-ink">圖片上傳與管理</h2>
         <p className="mt-2 text-sm text-muted">
           可上傳商品圖片與 CMS Hero 圖片。本機開發會儲存在 public/uploads，正式環境會依設定上傳至 Vercel Blob。
+        </p>
+        <p className="mt-2 text-xs leading-5 text-muted">
+          刪除圖片會同步移除媒體庫紀錄與儲存空間中的檔案；如果商品或頁面仍引用這張圖片，請重新選擇圖片。
         </p>
       </section>
 
@@ -103,6 +106,15 @@ export default async function AdminMediaPage() {
                 <p className="text-muted">商家：{item.merchant.name}</p>
                 <p className="text-muted">儲存服務：{item.provider}</p>
                 {item.fileName ? <p className="break-all text-muted">檔名：{item.fileName}</p> : null}
+                <form action={deleteMediaAction.bind(null, item.id)} className="border-t border-line pt-3">
+                  <button
+                    type="submit"
+                    className="rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    data-testid="admin-media-delete"
+                  >
+                    刪除圖片
+                  </button>
+                </form>
               </div>
             </div>
           ))}

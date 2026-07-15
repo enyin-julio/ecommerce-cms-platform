@@ -1,6 +1,7 @@
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import {
   sanitizeStorageFilename,
+  type DeleteObjectInput,
   type PutObjectInput,
   type StorageProvider,
   type StoredObject
@@ -29,5 +30,19 @@ export class VercelBlobStorageProvider implements StorageProvider {
       contentType: blob.contentType || input.contentType,
       size: input.body.byteLength
     };
+  }
+
+  async deleteObject(input: DeleteObjectInput): Promise<void> {
+    const target = input.url || input.pathname;
+
+    if (!target) {
+      return;
+    }
+
+    await del(target, {
+      ...(process.env.BLOB_READ_WRITE_TOKEN
+        ? { token: process.env.BLOB_READ_WRITE_TOKEN }
+        : {})
+    });
   }
 }
