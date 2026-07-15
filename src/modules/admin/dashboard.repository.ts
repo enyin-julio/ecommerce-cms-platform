@@ -16,6 +16,7 @@ export async function getAdminDashboardData(session: AdminSession) {
   const [
     siteSetting,
     merchants,
+    totalOrderCount,
     todayOrderTotal,
     todayOrderCount,
     unpaidOrderCount,
@@ -45,6 +46,9 @@ export async function getAdminDashboardData(session: AdminSession) {
         updatedAt: "desc"
       },
       take: 5
+    }),
+    prisma.order.count({
+      where: merchantWhere
     }),
     prisma.order.aggregate({
       where: {
@@ -139,6 +143,7 @@ export async function getAdminDashboardData(session: AdminSession) {
     siteSetting,
     primaryMerchant: siteSetting?.merchant || merchants[0] || null,
     merchants,
+    totalOrderCount,
     todayOrderTotal: todayOrderTotal._sum.total,
     todayOrderCount,
     unpaidOrderCount,

@@ -69,15 +69,19 @@ export default async function AdminDashboardPage() {
 
       <section>
         <SectionTitle title="訂單資訊" />
-        <div className="grid gap-4 rounded-lg border border-line bg-white p-6 shadow-sm md:grid-cols-4">
+        <div className="grid gap-4 rounded-lg border border-line bg-white p-6 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
+          <MetricCard label="全部訂單" value={`共 ${data.totalOrderCount} 筆`} />
           <MetricCard
             label="今日總金額"
             value={formatCurrency(data.todayOrderTotal?.toString() || "0")}
           />
-          <MetricCard label="今日訂單數" value={`共 ${data.todayOrderCount} 筆`} />
+          <MetricCard label="今日新增訂單" value={`共 ${data.todayOrderCount} 筆`} />
           <MetricCard label="未付款訂單" value={`共 ${data.unpaidOrderCount} 筆`} />
           <MetricCard label="待處理訂單" value={`共 ${data.pendingOrderCount} 筆`} />
-          <div className="md:col-span-4">
+          <p className="text-sm leading-6 text-muted sm:col-span-2 lg:col-span-4">
+            「全部訂單」會與訂單管理列表的總筆數一致；其他卡片是依付款與處理狀態拆出的營運指標。
+          </p>
+          <div className="sm:col-span-2 lg:col-span-1 lg:text-right">
             <Link
               href="/admin/orders"
               className="inline-flex rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700"
@@ -207,6 +211,7 @@ async function getDashboardDataSafely(session: Awaited<ReturnType<typeof require
       primaryMerchant: null,
       merchants: [],
       todayOrderTotal: null,
+      totalOrderCount: 0,
       todayOrderCount: 0,
       unpaidOrderCount: 0,
       pendingOrderCount: 0,
