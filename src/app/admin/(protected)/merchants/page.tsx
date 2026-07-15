@@ -103,16 +103,16 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-line text-sm">
+          <table className="min-w-[1180px] divide-y divide-line text-sm">
             <thead className="bg-slate-900 text-left text-white">
               <tr>
-                <th className="px-5 py-4 font-semibold">商家名稱</th>
-                <th className="px-5 py-4 font-semibold">狀態</th>
-                <th className="px-5 py-4 font-semibold">網址代號</th>
-                <th className="px-5 py-4 font-semibold">聯絡 Email</th>
-                <th className="px-5 py-4 font-semibold">資料數量</th>
-                <th className="px-5 py-4 font-semibold">最後更新</th>
-                <th className="px-5 py-4 font-semibold">操作</th>
+                <th className="w-64 px-5 py-4 font-semibold">商家名稱</th>
+                <th className="w-28 px-5 py-4 font-semibold">狀態</th>
+                <th className="w-64 px-5 py-4 font-semibold">網址代號</th>
+                <th className="w-72 px-5 py-4 font-semibold">聯絡 Email</th>
+                <th className="w-80 px-5 py-4 font-semibold">資料數量</th>
+                <th className="w-44 px-5 py-4 font-semibold">最後更新</th>
+                <th className="w-40 px-5 py-4 font-semibold">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line bg-white">
@@ -139,7 +139,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                         <input
                           name="name"
                           defaultValue={merchant.name}
-                          className="min-h-11 rounded border border-line px-3 text-sm outline-none focus:border-brand-500"
+                          className="min-h-11 w-full rounded border border-line px-3 text-sm outline-none focus:border-brand-500"
                           data-testid="admin-merchant-name"
                         />
                       </form>
@@ -160,7 +160,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                         form={`merchant-${merchant.id}`}
                         name="slug"
                         defaultValue={merchant.slug}
-                        className="min-h-11 rounded border border-line px-3 text-sm outline-none focus:border-brand-500"
+                        className="min-h-11 w-full rounded border border-line px-3 text-sm outline-none focus:border-brand-500"
                         data-testid="admin-merchant-slug"
                       />
                     </td>
@@ -170,24 +170,22 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                         name="contactEmail"
                         type="email"
                         defaultValue={merchant.contactEmail}
-                        className="min-h-11 rounded border border-line px-3 text-sm outline-none focus:border-brand-500"
+                        className="min-h-11 w-full rounded border border-line px-3 text-sm outline-none focus:border-brand-500"
                         data-testid="admin-merchant-email"
                       />
                     </td>
-                    <td className="px-5 py-4 text-muted">
-                      商品 {merchant._count.products}、分類 {merchant._count.categories}
-                      <br />
-                      頁面 {merchant._count.pages}、訂單 {merchant._count.orders}
-                      <br />
-                      媒體 {merchant._count.media}、使用者 {merchant._count.users}
-                      {merchant.siteSetting ? (
-                        <>
-                          <br />
-                          網站設定 1
-                        </>
-                      ) : null}
+                    <td className="px-5 py-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <DataCountBadge label="商品" value={merchant._count.products} />
+                        <DataCountBadge label="分類" value={merchant._count.categories} />
+                        <DataCountBadge label="頁面" value={merchant._count.pages} />
+                        <DataCountBadge label="訂單" value={merchant._count.orders} />
+                        <DataCountBadge label="媒體" value={merchant._count.media} />
+                        <DataCountBadge label="使用者" value={merchant._count.users} />
+                        <DataCountBadge label="網站設定" value={merchant.siteSetting ? 1 : 0} />
+                      </div>
                     </td>
-                    <td className="px-5 py-4 text-muted">
+                    <td className="whitespace-nowrap px-5 py-4 text-muted">
                       {new Intl.DateTimeFormat("zh-TW", {
                         dateStyle: "medium",
                         timeStyle: "short"
@@ -198,7 +196,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                         <button
                           form={`merchant-${merchant.id}`}
                           type="submit"
-                          className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-500"
+                          className="w-full rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-500"
                           data-testid="admin-merchant-update"
                         >
                           儲存
@@ -209,7 +207,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                             <form action={toggleMerchantActiveAction.bind(null, merchant.id)}>
                               <button
                                 type="submit"
-                                className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                                className={`w-full rounded-full border px-4 py-2 text-sm font-semibold ${
                                   merchant.isActive
                                     ? "border-amber-200 bg-white text-amber-700 hover:bg-amber-50"
                                     : "border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
@@ -223,13 +221,13 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                               <button
                                 type="submit"
                                 disabled={!canDelete}
-                                className="rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-line disabled:text-muted"
+                                className="w-full rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-line disabled:text-muted"
                                 data-testid="admin-merchant-delete"
                               >
                                 刪除
                               </button>
                               {!canDelete ? (
-                                <p className="mt-2 max-w-40 text-xs leading-5 text-muted">
+                                <p className="mt-2 text-xs leading-5 text-muted">
                                   此商家仍有關聯資料，不能直接刪除；可改用停用。
                                 </p>
                               ) : null}
@@ -274,5 +272,14 @@ function TextField({
         {...props}
       />
     </label>
+  );
+}
+
+function DataCountBadge({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="inline-flex items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-xs font-medium text-muted">
+      <span>{label}</span>
+      <span className="font-bold text-ink">{value}</span>
+    </span>
   );
 }
