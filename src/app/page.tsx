@@ -111,7 +111,6 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="最新消息"
             title="活動與品牌主題"
-            description="掌握近期活動、品牌企劃與精選推薦。"
             color={primaryColor}
           />
           <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -135,11 +134,6 @@ export default async function HomePage() {
                   <h3 className="mt-3 text-xl font-bold text-ink group-hover:text-brand-700">
                     {page.title}
                   </h3>
-                  {page.heroSubtitle ? (
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
-                      {page.heroSubtitle}
-                    </p>
-                  ) : null}
                 </div>
               </Link>
             ))}
@@ -154,7 +148,6 @@ export default async function HomePage() {
               <SectionHeading
                 eyebrow="精選商品"
                 title="值得推薦的商品"
-                description="為你整理近期精選商品，快速找到適合的選擇。"
                 color={primaryColor}
               />
               <Link
@@ -186,9 +179,6 @@ export default async function HomePage() {
                   <div className="p-5">
                     <p className="text-xs text-muted">{product.category?.name || "未分類"}</p>
                     <h3 className="mt-2 text-lg font-bold text-ink">{product.name}</h3>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
-                      {product.shortDescription}
-                    </p>
                     <p className="mt-4 text-lg font-bold text-ink">
                       {formatCurrency(product.price.toString())}
                     </p>
@@ -205,7 +195,6 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="了解更多"
             title="品牌與服務"
-            description="查看品牌故事、服務說明與購物相關資訊。"
             color={primaryColor}
           />
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -214,7 +203,6 @@ export default async function HomePage() {
                 href="/about"
                 title={brandPage.title}
                 label="品牌介紹"
-                description={brandPage.heroSubtitle}
                 color={primaryColor}
               />
             ) : null}
@@ -224,7 +212,6 @@ export default async function HomePage() {
                 href={getPublicPageHref(page)}
                 title={page.title}
                 label={pageTypeLabels[page.type as PageTypeValue]}
-                description={page.heroSubtitle}
                 color={primaryColor}
               />
             ))}
@@ -238,12 +225,10 @@ export default async function HomePage() {
 function SectionHeading({
   eyebrow,
   title,
-  description,
   color
 }: {
   eyebrow: string;
   title: string;
-  description: string;
   color: string;
 }) {
   return (
@@ -252,7 +237,6 @@ function SectionHeading({
         {eyebrow}
       </p>
       <h2 className="mt-3 text-3xl font-bold text-ink">{title}</h2>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">{description}</p>
     </div>
   );
 }
@@ -261,13 +245,11 @@ function ContentCard({
   href,
   title,
   label,
-  description,
   color
 }: {
   href: string;
   title: string;
   label: string;
-  description?: string | null;
   color: string;
 }) {
   return (
@@ -276,9 +258,6 @@ function ContentCard({
         {label}
       </span>
       <h3 className="mt-3 text-lg font-bold text-ink">{title}</h3>
-      {description ? (
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">{description}</p>
-      ) : null}
     </Link>
   );
 }

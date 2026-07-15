@@ -6,7 +6,6 @@ type ProductCardProps = {
   product: {
     name: string;
     slug: string;
-    shortDescription: string;
     price: { toString(): string };
     originalPrice?: { toString(): string } | null;
     imageUrl?: string | null;
@@ -44,9 +43,6 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-lg font-semibold text-ink group-hover:text-brand-700">
             {product.name}
           </h3>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
-            {product.shortDescription}
-          </p>
         </div>
         <p className="text-xl font-bold text-ink">
           {formatCurrency(product.price.toString())}
