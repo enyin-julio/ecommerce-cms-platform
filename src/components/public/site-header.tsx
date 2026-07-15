@@ -19,7 +19,9 @@ export async function SiteHeader() {
   ]);
   const siteName = siteSetting?.siteName || "UZEEK 品牌商城";
   const brandPage = pages.find((page) => page.type === PageType.brand);
-  const navPages = pages.filter((page) => page.type !== PageType.brand);
+  const contentPages = pages.filter((page) => page.type === PageType.content);
+  const landingPages = pages.filter((page) => page.type === PageType.landing);
+  const navPages = [...contentPages, ...landingPages];
   const directNavPages = navPages.slice(0, 4);
   const moreNavPages = navPages.slice(4);
 
@@ -42,14 +44,14 @@ export async function SiteHeader() {
           <Link className="hover:text-ink" href="/about">
             {brandPage?.title || "品牌介紹"}
           </Link>
-          <Link className="hover:text-ink" href="/products">
-            商品
-          </Link>
           {directNavPages.map((page) => (
             <Link key={page.id} className="hover:text-ink" href={getPublicPageHref(page)}>
               {page.title}
             </Link>
           ))}
+          <Link className="hover:text-ink" href="/products">
+            商品
+          </Link>
           {moreNavPages.length > 0 ? (
             <details className="group relative">
               <summary className="cursor-pointer list-none hover:text-ink">
