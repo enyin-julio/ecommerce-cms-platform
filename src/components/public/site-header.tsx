@@ -3,7 +3,6 @@ import Link from "next/link";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
 import { getCurrentCustomer } from "@/lib/customer-session";
 import { navigationGroups } from "@/lib/page-navigation";
-import { storePolicyDefinitions } from "@/lib/store-policy-types";
 import { getPublishedNavigationPages } from "@/modules/content/page.repository";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 
@@ -73,24 +72,6 @@ export async function SiteHeader() {
               </div>
             </details>
           ))}
-          <details className="group relative">
-            <summary className="cursor-pointer list-none hover:text-ink">
-              商店政策
-            </summary>
-            <div className="absolute left-0 top-8 z-30 w-72 rounded-lg border border-line bg-white p-3 shadow-soft">
-              <div className="grid gap-1">
-                {storePolicyDefinitions.map((policy) => (
-                  <Link
-                    key={policy.key}
-                    href={`/policies/${policy.slug}`}
-                    className="rounded-md px-3 py-2 hover:bg-slate-50 hover:text-ink"
-                  >
-                    {policy.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </details>
           <Link className="hover:text-ink" href="/cart">
             購物車
           </Link>
@@ -119,23 +100,6 @@ export async function SiteHeader() {
               </Link>
             </>
           )}
-        </nav>
-      </div>
-      <div className="border-t border-line bg-slate-50/80">
-        <nav
-          aria-label="商店政策"
-          className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-2 text-xs font-medium text-muted sm:px-6"
-        >
-          <span className="shrink-0 py-1 font-semibold text-ink">商店政策</span>
-          {storePolicyDefinitions.map((policy) => (
-            <Link
-              key={policy.key}
-              href={`/policies/${policy.slug}`}
-              className="shrink-0 rounded-full px-3 py-1 hover:bg-white hover:text-ink"
-            >
-              {policy.title}
-            </Link>
-          ))}
         </nav>
       </div>
     </header>
