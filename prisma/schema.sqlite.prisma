@@ -310,6 +310,10 @@ model SiteSetting {
   seoTitle       String?
   seoDescription String?
   googleSearchConsoleVerification String?
+  googleTagManagerId String?
+  googleAnalyticsMeasurementId String?
+  metaPixelId String?
+  facebookBusinessExtensionNote String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

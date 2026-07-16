@@ -45,7 +45,6 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
   const siteName = setting?.siteName || selectedMerchant?.name || "";
   const logoUrl = setting?.logoUrl || "";
   const primaryColor = setting?.primaryColor || "#2563eb";
-  const googleVerification = setting?.googleSearchConsoleVerification || "";
 
   if (!selectedMerchant) {
     return (
@@ -67,7 +66,7 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
           </p>
           <h2 className="mt-3 text-3xl font-bold text-ink">網站設定</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            管理前台會使用的站名、Logo、主色、SEO 資訊與 Google 搜尋收錄驗證。
+            管理前台會使用的站名、Logo、主色、SEO 資訊與行銷追蹤工具。
           </p>
         </div>
         <a
@@ -173,25 +172,73 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
           </SettingsSection>
 
           <SettingsSection
-            title="Google 搜尋收錄"
-            description="對應 Google Search Console 的 HTML 標記驗證。貼上 content 內的驗證碼，或直接貼完整 meta 標籤，系統會自動整理。"
+            title="行銷工具"
+            description="這裡對應常見的廣告、分析與搜尋收錄工具。填入 ID 後，前台會自動輸出必要追蹤碼。"
           >
-            <TextField
-              label="Google Search Console 驗證碼"
-              name="googleSearchConsoleVerification"
-              defaultValue={googleVerification}
-              placeholder="例如：abc123-google-verification-code"
-            />
-            <div className="rounded-lg bg-slate-50 p-4 text-sm leading-6 text-muted">
-              <p className="font-semibold text-ink">操作方式</p>
-              <p className="mt-2">
-                進入 Google Search Console，新增網站資源後選擇「HTML 標記」。複製
-                <span className="mx-1 rounded bg-white px-1 font-mono text-xs text-ink">
-                  content=&quot;...&quot;
-                </span>
-                裡面的文字貼到此欄位，再儲存。回到 Google Search Console 按「驗證」即可。
-              </p>
-            </div>
+            <MarketingToolCard
+              title="Google 搜尋引擎收錄"
+              description="貼上 Google Search Console HTML 標記的 content 驗證碼。"
+            >
+              <TextField
+                label="Google Search Console 驗證碼"
+                name="googleSearchConsoleVerification"
+                defaultValue={setting?.googleSearchConsoleVerification || ""}
+                placeholder="例如：abc123-google-verification-code"
+              />
+            </MarketingToolCard>
+
+            <MarketingToolCard
+              title="Google 代碼管理工具"
+              description="填入 GTM 容器 ID，前台會自動安裝 Google Tag Manager。"
+            >
+              <TextField
+                label="GTM Container ID"
+                name="googleTagManagerId"
+                defaultValue={setting?.googleTagManagerId || ""}
+                placeholder="例如：GTM-XXXXXXX"
+              />
+            </MarketingToolCard>
+
+            <MarketingToolCard
+              title="Meta 像素（原 Facebook 像素）"
+              description="填入 Meta Pixel ID，前台會自動安裝基礎 PageView 追蹤。"
+            >
+              <TextField
+                label="Meta Pixel ID"
+                name="metaPixelId"
+                defaultValue={setting?.metaPixelId || ""}
+                placeholder="例如：123456789012345"
+              />
+            </MarketingToolCard>
+
+            <MarketingToolCard
+              title="Google Analytics 4"
+              description="填入 GA4 Measurement ID，前台會自動安裝 gtag。"
+            >
+              <TextField
+                label="GA4 Measurement ID"
+                name="googleAnalyticsMeasurementId"
+                defaultValue={setting?.googleAnalyticsMeasurementId || ""}
+                placeholder="例如：G-XXXXXXXXXX"
+              />
+            </MarketingToolCard>
+
+            <MarketingToolCard
+              title="Facebook 商業擴充功能（FBE）+ 轉換 API"
+              description="轉換 API 需要 server access token，不能放在前台。這裡先記錄人工設定狀態，正式串接時會放到安全環境變數。"
+            >
+              <label className="block">
+                <span className="text-sm font-semibold text-ink">設定備註</span>
+                <textarea
+                  name="facebookBusinessExtensionNote"
+                  defaultValue={setting?.facebookBusinessExtensionNote || ""}
+                  placeholder="例如：Meta Business 已連接、CAPI token 尚未建立、等待正式廣告帳號審核。"
+                  rows={4}
+                  className="mt-2 w-full rounded border border-line px-4 py-3 text-sm outline-none focus:border-brand-500"
+                  data-testid="admin-settings-facebookBusinessExtensionNote"
+                />
+              </label>
+            </MarketingToolCard>
           </SettingsSection>
 
           <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
@@ -271,6 +318,26 @@ function SettingsSection({
       </div>
       <div className="grid gap-5">{children}</div>
     </section>
+  );
+}
+
+function MarketingToolCard({
+  title,
+  description,
+  children
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-line bg-slate-50 p-4">
+      <div className="mb-4">
+        <h4 className="font-bold text-ink">{title}</h4>
+        <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
+      </div>
+      {children}
+    </div>
   );
 }
 
