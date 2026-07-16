@@ -5,6 +5,7 @@ import type { AdminSession } from "@/lib/session-token";
 
 const navItems = [
   { href: "/admin", label: "總覽" },
+  { href: "/admin/account", label: "帳號設定" },
   { href: "/admin/merchants", label: "商家管理" },
   { href: "/admin/settings", label: "網站設定" },
   { href: "/admin/themes", label: "主題管理" },
