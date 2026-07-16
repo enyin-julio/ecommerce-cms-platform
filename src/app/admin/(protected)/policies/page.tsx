@@ -142,7 +142,11 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
           })}
         </div>
 
-        <form action={updateStorePolicyAction} className="space-y-5 p-6">
+        <form
+          key={`${selectedMerchant.id}-${activePolicy.key}`}
+          action={updateStorePolicyAction}
+          className="space-y-5 p-6"
+        >
           <input type="hidden" name="merchantId" value={selectedMerchant.id} />
           <input type="hidden" name="policyKey" value={activePolicy.key} />
 
@@ -167,6 +171,7 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
           <label className="block">
             <span className="text-sm font-semibold text-ink">{activePolicy.title}內容</span>
             <textarea
+              key={`${selectedMerchant.id}-${activePolicy.key}-content`}
               name="content"
               defaultValue={activeContent}
               rows={16}
