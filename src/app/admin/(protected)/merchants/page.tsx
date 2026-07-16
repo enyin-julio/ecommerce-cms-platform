@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import type { InputHTMLAttributes } from "react";
 import {
+  cleanupTestMerchantDataAction,
   createMerchantAction,
   deleteMerchantAction,
   toggleMerchantActiveAction,
@@ -34,6 +36,11 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
           id: true
         }
       },
+      storePolicy: {
+        select: {
+          id: true
+        }
+      },
       _count: {
         select: {
           users: true,
@@ -56,11 +63,11 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-            商家設定
+            商家管理
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink">商家管理</h2>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink">商家列表</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            管理商家名稱、網址代號與聯絡 Email。刪除商家前，必須先清空該商家的商品、分類、頁面、訂單、媒體、使用者與網站設定。
+            管理平台內的商家名稱、網址代號、聯絡 Email 與啟用狀態。正式商家若仍有資料，請先停用，不要直接刪除。
           </p>
         </div>
         {session.role === "admin" ? (
@@ -84,11 +91,11 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
         <section id="new-merchant" className="scroll-mt-24 rounded-lg border border-line bg-white p-6 shadow-sm">
           <h3 className="text-xl font-bold text-ink">新增商家</h3>
           <p className="mt-2 text-sm leading-6 text-muted">
-            網址代號用於系統辨識，建議使用英文小寫與減號，例如 aih-brand。
+            網址代號用於系統識別，建議使用英文小寫與連字號，例如 uzeek-brand-store。
           </p>
           <form action={createMerchantAction} className="mt-6 grid gap-5 lg:grid-cols-[1fr_1fr_1fr_auto]">
             <TextField label="商家名稱" name="name" placeholder="例如：UZEEK 品牌商城" required />
-            <TextField label="網址代號（Slug）" name="slug" placeholder="例如：aih-brand" required />
+            <TextField label="網址代號（Slug）" name="slug" placeholder="例如：uzeek-brand-store" required />
             <TextField label="聯絡 Email" name="contactEmail" type="email" placeholder="service@example.com" required />
             <div className="flex items-end">
               <button
@@ -106,22 +113,20 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
       <section className="overflow-hidden rounded-lg border border-line bg-white shadow-sm">
         <div className="border-b border-line p-6">
           <h3 className="text-xl font-bold text-ink">商家列表</h3>
-          <p className="mt-2 text-sm text-muted">
-            共 {merchants.length} 個商家。
-          </p>
+          <p className="mt-2 text-sm text-muted">共 {merchants.length} 個商家。</p>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-[1180px] divide-y divide-line text-sm">
+          <table className="min-w-[1220px] divide-y divide-line text-sm">
             <thead className="bg-slate-900 text-left text-white">
               <tr>
                 <th className="w-64 px-5 py-4 font-semibold">商家名稱</th>
                 <th className="w-28 px-5 py-4 font-semibold">狀態</th>
                 <th className="w-64 px-5 py-4 font-semibold">網址代號</th>
                 <th className="w-72 px-5 py-4 font-semibold">聯絡 Email</th>
-                <th className="w-80 px-5 py-4 font-semibold">資料數量</th>
+                <th className="w-96 px-5 py-4 font-semibold">資料數量</th>
                 <th className="w-44 px-5 py-4 font-semibold">最後更新</th>
-                <th className="w-40 px-5 py-4 font-semibold">操作</th>
+                <th className="w-44 px-5 py-4 font-semibold">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line bg-white">
@@ -134,8 +139,11 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                   merchant._count.media +
                   merchant._count.orders +
                   merchant._count.carts +
-                  (merchant.siteSetting ? 1 : 0);
+                  (merchant.siteSetting ? 1 : 0) +
+                  (merchant.storePolicy ? 1 : 0);
                 const canDelete = session.role === "admin" && relatedCount === 0;
+                const canCleanupTestData =
+                  session.role === "admin" && relatedCount > 0 && isTestMerchantRecord(merchant);
 
                 return (
                   <tr key={merchant.id} className="align-top hover:bg-slate-50" data-testid="admin-merchant-row">
@@ -184,7 +192,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                       />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                         <DataCountBadge label="商品" value={merchant._count.products} />
                         <DataCountBadge label="分類" value={merchant._count.categories} />
                         <DataCountBadge label="頁面" value={merchant._count.pages} />
@@ -192,6 +200,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                         <DataCountBadge label="媒體" value={merchant._count.media} />
                         <DataCountBadge label="使用者" value={merchant._count.users} />
                         <DataCountBadge label="網站設定" value={merchant.siteSetting ? 1 : 0} />
+                        <DataCountBadge label="商店政策" value={merchant.storePolicy ? 1 : 0} />
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-5 py-4 text-muted">
@@ -226,6 +235,22 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                                 {merchant.isActive ? "停用" : "啟用"}
                               </button>
                             </form>
+
+                            {canCleanupTestData ? (
+                              <form action={cleanupTestMerchantDataAction.bind(null, merchant.id)}>
+                                <button
+                                  type="submit"
+                                  className="w-full rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100"
+                                  data-testid="admin-merchant-cleanup-test-data"
+                                >
+                                  清理測試資料
+                                </button>
+                                <p className="mt-2 text-xs leading-5 text-amber-700">
+                                  只清理此測試商家的資料，保留商家本身。
+                                </p>
+                              </form>
+                            ) : null}
+
                             <form action={deleteMerchantAction.bind(null, merchant.id)}>
                               <button
                                 type="submit"
@@ -237,7 +262,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
                               </button>
                               {!canDelete ? (
                                 <p className="mt-2 text-xs leading-5 text-muted">
-                                  此商家仍有關聯資料，不能直接刪除；可改用停用。
+                                  此商家仍有關聯資料，不能直接刪除；正式商家請停用，測試商家可先清理測試資料。
                                 </p>
                               ) : null}
                             </form>
@@ -270,7 +295,7 @@ function TextField({
 }: {
   label: string;
   name: string;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
       <span className="text-sm font-semibold text-ink">{label}</span>
@@ -286,9 +311,19 @@ function TextField({
 
 function DataCountBadge({ label, value }: { label: string; value: number }) {
   return (
-    <span className="inline-flex items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-xs font-medium text-muted">
+    <span className="inline-flex min-h-10 items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-xs font-medium text-muted">
       <span>{label}</span>
       <span className="font-bold text-ink">{value}</span>
     </span>
   );
+}
+
+function isTestMerchantRecord(merchant: {
+  name: string;
+  slug: string;
+  contactEmail: string;
+}) {
+  const marker = `${merchant.name} ${merchant.slug} ${merchant.contactEmail}`.toLowerCase();
+
+  return ["test", "demo", "smoke", "測試"].some((keyword) => marker.includes(keyword));
 }

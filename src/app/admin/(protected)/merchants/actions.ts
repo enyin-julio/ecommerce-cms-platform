@@ -28,6 +28,16 @@ function redirectToMerchants(message: string) {
   redirect(`/admin/merchants?message=${encodeURIComponent(message)}`);
 }
 
+function isTestMerchantRecord(merchant: {
+  name: string;
+  slug: string;
+  contactEmail: string;
+}) {
+  const marker = `${merchant.name} ${merchant.slug} ${merchant.contactEmail}`.toLowerCase();
+
+  return ["test", "demo", "smoke", "測試"].some((keyword) => marker.includes(keyword));
+}
+
 export async function createMerchantAction(formData: FormData) {
   await requireRoles(["admin"]);
   const data = parseMerchantForm(formData);
@@ -96,6 +106,11 @@ export async function deleteMerchantAction(merchantId: string) {
         select: {
           id: true
         }
+      },
+      storePolicy: {
+        select: {
+          id: true
+        }
       }
     }
   });
@@ -112,10 +127,11 @@ export async function deleteMerchantAction(merchantId: string) {
     merchant._count.media +
     merchant._count.orders +
     merchant._count.carts +
-    (merchant.siteSetting ? 1 : 0);
+    (merchant.siteSetting ? 1 : 0) +
+    (merchant.storePolicy ? 1 : 0);
 
   if (relatedCount > 0) {
-    redirectToMerchants("此商家仍有商品、分類、頁面、訂單、媒體、使用者或網站設定，無法直接刪除。");
+    redirectToMerchants("此商家仍有商品、分類、頁面、訂單、媒體、使用者、網站設定或商店政策，無法直接刪除。");
   }
 
   await prisma.merchant.delete({
@@ -126,6 +142,210 @@ export async function deleteMerchantAction(merchantId: string) {
 
   revalidateMerchantPaths();
   redirectToMerchants("商家已刪除。");
+}
+
+export async function cleanupTestMerchantDataAction(merchantId: string) {
+  await requireRoles(["admin"]);
+
+  const merchant = await prisma.merchant.findUnique({
+    where: {
+      id: merchantId
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      contactEmail: true
+    }
+  });
+
+  if (!merchant) {
+    return redirectToMerchants("找不到這個商家。");
+  }
+
+  if (!isTestMerchantRecord(merchant)) {
+    return redirectToMerchants("只允許清理 TEST / demo / smoke / 測試商家的資料。正式商家請不要使用此功能。");
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const [orders, products, carts] = await Promise.all([
+      tx.order.findMany({
+        where: {
+          merchantId
+        },
+        select: {
+          id: true
+        }
+      }),
+      tx.product.findMany({
+        where: {
+          merchantId
+        },
+        select: {
+          id: true
+        }
+      }),
+      tx.cart.findMany({
+        where: {
+          merchantId
+        },
+        select: {
+          id: true
+        }
+      })
+    ]);
+
+    const orderIds = orders.map((order) => order.id);
+    const productIds = products.map((product) => product.id);
+    const cartIds = carts.map((cart) => cart.id);
+    const payments = await tx.payment.findMany({
+      where: {
+        orderId: {
+          in: orderIds
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+    const paymentIds = payments.map((payment) => payment.id);
+
+    await tx.paymentWebhookLog.deleteMany({
+      where: {
+        paymentId: {
+          in: paymentIds
+        }
+      }
+    });
+    await tx.paymentRefund.deleteMany({
+      where: {
+        OR: [
+          {
+            orderId: {
+              in: orderIds
+            }
+          },
+          {
+            paymentId: {
+              in: paymentIds
+            }
+          }
+        ]
+      }
+    });
+    await tx.payment.deleteMany({
+      where: {
+        orderId: {
+          in: orderIds
+        }
+      }
+    });
+    await tx.orderStatusHistory.deleteMany({
+      where: {
+        orderId: {
+          in: orderIds
+        }
+      }
+    });
+    await tx.stockMovement.deleteMany({
+      where: {
+        OR: [
+          {
+            orderId: {
+              in: orderIds
+            }
+          },
+          {
+            productId: {
+              in: productIds
+            }
+          }
+        ]
+      }
+    });
+    await tx.orderItem.deleteMany({
+      where: {
+        orderId: {
+          in: orderIds
+        }
+      }
+    });
+    const deletedOrders = await tx.order.deleteMany({
+      where: {
+        id: {
+          in: orderIds
+        }
+      }
+    });
+    await tx.cartItem.deleteMany({
+      where: {
+        OR: [
+          {
+            cartId: {
+              in: cartIds
+            }
+          },
+          {
+            productId: {
+              in: productIds
+            }
+          }
+        ]
+      }
+    });
+    await tx.cart.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+    await tx.product.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+    await tx.category.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+    await tx.page.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+    await tx.media.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+    const deletedSiteSettings = await tx.siteSetting.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+    const deletedStorePolicies = await tx.storePolicy.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+    const deletedUsers = await tx.user.deleteMany({
+      where: {
+        merchantId
+      }
+    });
+
+    return {
+      orders: deletedOrders.count,
+      users: deletedUsers.count,
+      siteSettings: deletedSiteSettings.count,
+      storePolicies: deletedStorePolicies.count
+    };
+  });
+
+  revalidateMerchantPaths();
+  redirectToMerchants(
+    `測試資料已清理：訂單 ${result.orders} 筆、使用者 ${result.users} 位、網站設定 ${result.siteSettings} 筆、商店政策 ${result.storePolicies} 筆。`
+  );
 }
 
 export async function toggleMerchantActiveAction(merchantId: string) {
