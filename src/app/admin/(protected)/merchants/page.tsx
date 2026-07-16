@@ -63,6 +63,15 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
             管理商家名稱、網址代號與聯絡 Email。刪除商家前，必須先清空該商家的商品、分類、頁面、訂單、媒體、使用者與網站設定。
           </p>
         </div>
+        {session.role === "admin" ? (
+          <a
+            href="#new-merchant"
+            className="rounded-full bg-brand-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
+            data-testid="admin-merchant-new-shortcut"
+          >
+            新增商家
+          </a>
+        ) : null}
       </div>
 
       {params?.message ? (
@@ -72,7 +81,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
       ) : null}
 
       {session.role === "admin" ? (
-        <section className="rounded-lg border border-line bg-white p-6 shadow-sm">
+        <section id="new-merchant" className="scroll-mt-24 rounded-lg border border-line bg-white p-6 shadow-sm">
           <h3 className="text-xl font-bold text-ink">新增商家</h3>
           <p className="mt-2 text-sm leading-6 text-muted">
             網址代號用於系統辨識，建議使用英文小寫與減號，例如 aih-brand。

@@ -78,7 +78,7 @@ export default async function AdminThemesPage({ searchParams }: AdminThemesPageP
       ) : null}
 
       {merchants.length > 1 ? (
-        <form className="rounded-lg border border-line bg-white p-5 shadow-sm">
+        <form action="/admin/themes" className="rounded-lg border border-line bg-white p-5 shadow-sm">
           <label className="block max-w-xl">
             <span className="text-sm font-semibold text-ink">選擇商家</span>
             <select
@@ -103,7 +103,7 @@ export default async function AdminThemesPage({ searchParams }: AdminThemesPageP
         </form>
       ) : null}
 
-      <section className="rounded-lg border border-line bg-white p-6 shadow-sm">
+      <section key={selectedMerchant.id} className="rounded-lg border border-line bg-white p-6 shadow-sm">
         <p className="text-sm font-semibold text-muted">目前使用的主題</p>
         <div className="mt-4 flex flex-col justify-between gap-4 rounded-lg bg-slate-50 p-5 sm:flex-row sm:items-center">
           <div>

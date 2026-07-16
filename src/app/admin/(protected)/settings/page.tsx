@@ -86,7 +86,7 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
       ) : null}
 
       {merchants.length > 1 ? (
-        <form className="rounded-lg border border-line bg-white p-5 shadow-sm">
+        <form action="/admin/settings" className="rounded-lg border border-line bg-white p-5 shadow-sm">
           <label className="block max-w-xl">
             <span className="text-sm font-semibold text-ink">選擇商家</span>
             <select
@@ -111,7 +111,7 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
         </form>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div key={selectedMerchant.id} className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <form
           action={updateSiteSettingAction}
           className="space-y-6 rounded-lg border border-line bg-white p-6 shadow-sm"

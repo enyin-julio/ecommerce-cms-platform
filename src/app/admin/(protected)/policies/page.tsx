@@ -84,7 +84,7 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
       ) : null}
 
       {merchants.length > 1 ? (
-        <form className="rounded-lg border border-line bg-white p-5 shadow-sm">
+        <form action="/admin/policies" className="rounded-lg border border-line bg-white p-5 shadow-sm">
           <label className="block max-w-xl">
             <span className="text-sm font-semibold text-ink">選擇商家</span>
             <select
