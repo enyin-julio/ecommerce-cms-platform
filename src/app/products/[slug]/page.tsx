@@ -124,9 +124,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </form>
 
             <div className="mt-6 grid gap-3 text-sm text-muted sm:grid-cols-3">
-              <InfoBadge title="安全結帳" body="訂單金額由後端重新計算" />
-              <InfoBadge title="庫存檢查" body="下單前確認商品可售" />
-              <InfoBadge title="訂單查詢" body="會員可查詢歷史訂單" />
+              <InfoBadge title="安心下單" body="訂單金額由系統重新計算" />
+              <InfoBadge title="庫存確認" body="結帳前會再次檢查庫存" />
+              <InfoBadge title="訂單查詢" body="用訂單編號與 Email 查詢" href="/order-lookup" />
             </div>
           </div>
         </div>
@@ -152,25 +152,37 @@ function StockBadge({ stock }: { stock: number }) {
   if (stock <= 5) {
     return (
       <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-        低庫存，剩 {stock} 件
+        庫存較少：{stock} 件
       </span>
     );
   }
 
   return (
     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-      現貨，庫存 {stock} 件
+      現貨供應：{stock} 件
     </span>
   );
 }
 
-function InfoBadge({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-lg border border-line bg-white p-3">
+function InfoBadge({ title, body, href }: { title: string; body: string; href?: string }) {
+  const className =
+    "rounded-lg border border-line bg-white p-3 transition hover:border-brand-500 hover:shadow-sm";
+  const content = (
+    <>
       <p className="font-semibold text-ink">{title}</p>
       <p className="mt-1 text-xs leading-5">{body}</p>
-    </div>
+    </>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }
 
 async function getProductSafely(slug: string) {
