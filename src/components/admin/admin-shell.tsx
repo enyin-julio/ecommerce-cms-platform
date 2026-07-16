@@ -3,19 +3,39 @@ import type { ReactNode } from "react";
 import { logoutAction } from "@/app/admin/actions";
 import type { AdminSession } from "@/lib/session-token";
 
-const navItems = [
-  { href: "/admin", label: "總覽" },
-  { href: "/admin/account", label: "帳號設定" },
-  { href: "/admin/merchants", label: "商家管理" },
-  { href: "/admin/settings", label: "網站設定" },
-  { href: "/admin/themes", label: "主題管理" },
-  { href: "/admin/policies", label: "商店政策" },
-  { href: "/admin/marketing", label: "行銷管理" },
-  { href: "/admin/pages", label: "頁面管理" },
-  { href: "/admin/products", label: "商品管理" },
-  { href: "/admin/categories", label: "商品分類" },
-  { href: "/admin/media", label: "媒體庫" },
-  { href: "/admin/orders", label: "訂單管理" }
+const navGroups = [
+  {
+    label: "常用",
+    items: [
+      { href: "/admin", label: "總覽" },
+      { href: "/admin/account", label: "帳號設定" }
+    ]
+  },
+  {
+    label: "商店設定",
+    items: [
+      { href: "/admin/merchants", label: "商家管理" },
+      { href: "/admin/settings", label: "網站設定" },
+      { href: "/admin/themes", label: "主題管理" },
+      { href: "/admin/policies", label: "商店政策" },
+      { href: "/admin/marketing", label: "行銷管理" }
+    ]
+  },
+  {
+    label: "內容管理",
+    items: [
+      { href: "/admin/pages", label: "頁面管理" },
+      { href: "/admin/media", label: "媒體庫" }
+    ]
+  },
+  {
+    label: "商品營運",
+    items: [
+      { href: "/admin/products", label: "商品管理" },
+      { href: "/admin/categories", label: "商品分類" },
+      { href: "/admin/orders", label: "訂單管理" }
+    ]
+  }
 ];
 
 const roleLabels: Record<AdminSession["role"], string> = {
@@ -32,21 +52,37 @@ type AdminShellProps = {
 export function AdminShell({ children, session }: AdminShellProps) {
   return (
     <div className="min-h-screen bg-slate-100 text-ink lg:flex">
-      <aside className="border-b border-line bg-white lg:fixed lg:inset-y-0 lg:w-64 lg:border-b-0 lg:border-r">
-        <div className="flex h-16 items-center justify-between px-5 lg:h-20">
+      <aside className="border-b border-line bg-white lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r">
+        <div className="flex h-16 shrink-0 items-center justify-between px-5 lg:h-20">
           <Link href="/admin" className="text-lg font-bold tracking-tight">
             電商 CMS 後台
           </Link>
         </div>
-        <nav className="flex gap-2 overflow-x-auto px-4 pb-4 lg:block lg:space-y-1 lg:overflow-visible">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block whitespace-nowrap rounded-lg px-4 py-3 text-sm font-medium text-muted hover:bg-brand-50 hover:text-brand-700"
+        <nav className="flex gap-3 overflow-x-auto px-4 pb-4 lg:block lg:min-h-0 lg:flex-1 lg:space-y-3 lg:overflow-y-auto lg:overflow-x-hidden lg:pb-8">
+          {navGroups.map((group) => (
+            <details
+              key={group.label}
+              open
+              className="min-w-44 rounded-lg border border-line bg-white lg:min-w-0"
             >
-              {item.label}
-            </Link>
+              <summary className="cursor-pointer list-none rounded-lg px-4 py-3 text-sm font-bold text-ink hover:bg-slate-50">
+                <span className="flex items-center justify-between gap-3">
+                  {group.label}
+                  <span className="text-xs text-muted">展開</span>
+                </span>
+              </summary>
+              <div className="space-y-1 border-t border-line p-2">
+                {group.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-brand-50 hover:text-brand-700"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </details>
           ))}
         </nav>
       </aside>
