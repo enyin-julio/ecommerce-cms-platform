@@ -7,7 +7,10 @@ import {
   storePolicyDefinitions
 } from "@/lib/store-policy-types";
 import { getAdminMerchants } from "@/modules/catalog/product.repository";
-import { getAdminStorePolicy } from "@/modules/settings/store-policy.repository";
+import {
+  getAdminStorePolicy,
+  getPublicStorePolicyMerchantId
+} from "@/modules/settings/store-policy.repository";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +30,13 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
   const params = await searchParams;
   const session = await requireAdminSession();
   const merchants = await getAdminMerchants(session);
+  const publicMerchantId =
+    session.role === "admin" ? await getPublicStorePolicyMerchantId() : session.merchantId;
   const selectedMerchant =
-    merchants.find((merchant) => merchant.id === params.merchantId) || merchants[0] || null;
+    merchants.find((merchant) => merchant.id === params.merchantId) ||
+    merchants.find((merchant) => merchant.id === publicMerchantId) ||
+    merchants[0] ||
+    null;
   const policy = selectedMerchant
     ? await getAdminStorePolicy(selectedMerchant.id, session)
     : null;

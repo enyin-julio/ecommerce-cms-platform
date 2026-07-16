@@ -19,11 +19,27 @@ export async function getAdminStorePolicy(merchantId: string, session: AdminSess
 export async function getPublicStorePolicy() {
   noStore();
 
-  return prisma.storePolicy.findFirst({
+  const publicSiteSetting = await prisma.siteSetting.findFirst({
     where: {
       merchant: {
         isActive: true
       }
+    },
+    include: {
+      merchant: true
+    },
+    orderBy: {
+      updatedAt: "desc"
+    }
+  });
+
+  if (!publicSiteSetting) {
+    return null;
+  }
+
+  return prisma.storePolicy.findUnique({
+    where: {
+      merchantId: publicSiteSetting.merchantId
     },
     include: {
       merchant: {
@@ -32,8 +48,25 @@ export async function getPublicStorePolicy() {
         }
       }
     },
+  });
+}
+
+export async function getPublicStorePolicyMerchantId() {
+  noStore();
+
+  const publicSiteSetting = await prisma.siteSetting.findFirst({
+    where: {
+      merchant: {
+        isActive: true
+      }
+    },
+    select: {
+      merchantId: true
+    },
     orderBy: {
       updatedAt: "desc"
     }
   });
+
+  return publicSiteSetting?.merchantId || null;
 }
