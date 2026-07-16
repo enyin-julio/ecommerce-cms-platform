@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import type { ReactNode } from "react";
+import { PublicFooterGate } from "@/components/public/public-footer-gate";
+import { SiteFooter } from "@/components/public/site-footer";
 import { getThemePresetById } from "@/lib/theme-presets";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 import "./globals.css";
@@ -63,6 +65,9 @@ export default async function RootLayout({
           </noscript>
         ) : null}
         {children}
+        <PublicFooterGate>
+          <SiteFooter />
+        </PublicFooterGate>
       </body>
     </html>
   );

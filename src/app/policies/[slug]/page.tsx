@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
 import { getStorePolicyDefinitionBySlug, storePolicyDefinitions } from "@/lib/store-policy-types";
@@ -33,22 +32,6 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
     <main className="min-h-screen bg-slate-50">
       <SiteHeader />
       <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-        <div className="mb-6 flex flex-wrap gap-3">
-          {storePolicyDefinitions.map((item) => (
-            <Link
-              key={item.key}
-              href={`/policies/${item.slug}`}
-              className={
-                item.key === policyDefinition.key
-                  ? "rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-                  : "rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-500"
-              }
-            >
-              {item.title}
-            </Link>
-          ))}
-        </div>
-
         <article className="rounded-lg border border-line bg-white p-6 shadow-sm sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
             {siteName}
