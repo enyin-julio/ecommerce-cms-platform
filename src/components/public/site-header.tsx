@@ -121,6 +121,23 @@ export async function SiteHeader() {
           )}
         </nav>
       </div>
+      <div className="border-t border-line bg-slate-50/80">
+        <nav
+          aria-label="商店政策"
+          className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-2 text-xs font-medium text-muted sm:px-6"
+        >
+          <span className="shrink-0 py-1 font-semibold text-ink">商店政策</span>
+          {storePolicyDefinitions.map((policy) => (
+            <Link
+              key={policy.key}
+              href={`/policies/${policy.slug}`}
+              className="shrink-0 rounded-full px-3 py-1 hover:bg-white hover:text-ink"
+            >
+              {policy.title}
+            </Link>
+          ))}
+        </nav>
+      </div>
     </header>
   );
 }
