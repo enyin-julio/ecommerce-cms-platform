@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
 import { getCurrentCustomer } from "@/lib/customer-session";
+import { storePolicyDefinitions } from "@/lib/store-policy-types";
 import { getPublishedNavigationPages } from "@/modules/content/page.repository";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 
@@ -75,6 +76,24 @@ export async function SiteHeader() {
               </div>
             </details>
           ) : null}
+          <details className="group relative">
+            <summary className="cursor-pointer list-none hover:text-ink">
+              商店政策
+            </summary>
+            <div className="absolute left-0 top-8 z-30 w-72 rounded-lg border border-line bg-white p-3 shadow-soft">
+              <div className="grid gap-1">
+                {storePolicyDefinitions.map((policy) => (
+                  <Link
+                    key={policy.key}
+                    href={`/policies/${policy.slug}`}
+                    className="rounded-md px-3 py-2 hover:bg-slate-50 hover:text-ink"
+                  >
+                    {policy.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </details>
           <Link className="hover:text-ink" href="/cart">
             購物車
           </Link>

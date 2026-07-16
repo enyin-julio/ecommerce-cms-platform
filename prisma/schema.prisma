@@ -81,6 +81,7 @@ model Merchant {
   carts        Cart[]
   orders       Order[]
   siteSetting  SiteSetting?
+  storePolicy  StorePolicy?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -357,4 +358,17 @@ model SiteSetting {
   facebookBusinessExtensionNote String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model StorePolicy {
+  id                    String   @id @default(cuid())
+  merchantId            String   @unique
+  merchant              Merchant @relation(fields: [merchantId], references: [id])
+  privacyPolicy         String?  @db.Text
+  serviceTerms          String?  @db.Text
+  reservationTerms      String?  @db.Text
+  returnRefundPolicy    String?  @db.Text
+  paymentShippingPolicy String?  @db.Text
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
