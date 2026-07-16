@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
 import { formatCurrency } from "@/lib/format";
 import { getGuestOrderByEmail } from "@/modules/customers/customer.repository";
+import { getDisplayOrderNumber } from "@/modules/orders/order-number";
 
 export const dynamic = "force-dynamic";
 
@@ -88,7 +89,9 @@ export default async function OrderLookupPage({ searchParams }: OrderLookupPageP
             <div className="flex flex-col justify-between gap-3 sm:flex-row">
               <div>
                 <p className="text-xs text-muted">訂單編號</p>
-                <p className="mt-1 break-all font-mono text-sm font-semibold text-ink">{order.id}</p>
+                <p className="mt-1 break-all font-mono text-sm font-semibold text-ink">
+                  {getDisplayOrderNumber(order)}
+                </p>
                 <p className="mt-3 text-sm text-muted">
                   建立時間：{order.createdAt.toLocaleString("zh-TW")}
                 </p>

@@ -38,7 +38,14 @@ export async function getCustomerOrderById(userId: string, orderId: string) {
 export async function getGuestOrderByEmail(orderId: string, email: string) {
   return prisma.order.findFirst({
     where: {
-      id: orderId,
+      OR: [
+        {
+          id: orderId
+        },
+        {
+          orderNumber: orderId
+        }
+      ],
       customerEmail: email.toLowerCase(),
       userId: null
     },

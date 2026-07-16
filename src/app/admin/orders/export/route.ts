@@ -7,6 +7,7 @@ import {
 } from "@/lib/domain-types";
 import { getCurrentAdminSession } from "@/lib/session";
 import { getAdminOrdersForExport } from "@/modules/orders/order.repository";
+import { getDisplayOrderNumber } from "@/modules/orders/order-number";
 
 const exportStatuses: OrderStatusValue[] = [
   OrderStatus.pending,
@@ -149,7 +150,7 @@ function buildCsvRow(
   return fields.map((field) => {
     switch (field) {
       case "orderId":
-        return order.id;
+        return getDisplayOrderNumber(order);
       case "status":
         return orderStatusLabels[order.status as OrderStatusValue] || order.status;
       case "paymentStatus":

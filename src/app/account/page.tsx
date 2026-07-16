@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/public/site-header";
 import { requireCustomerSession } from "@/lib/customer-session";
 import { prisma } from "@/lib/prisma";
 import { getCustomerById } from "@/modules/customers/customer.repository";
+import { getDisplayOrderNumber } from "@/modules/orders/order-number";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export default async function AccountPage() {
       },
       select: {
         id: true,
+        orderNumber: true,
         status: true,
         paymentStatus: true,
         total: true,
@@ -170,7 +172,7 @@ export default async function AccountPage() {
                     className="flex flex-col gap-2 py-4 hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="break-all font-semibold text-ink">{order.id}</p>
+                      <p className="break-all font-semibold text-ink">{getDisplayOrderNumber(order)}</p>
                       <p className="mt-1 text-xs text-muted">
                         {new Intl.DateTimeFormat("zh-TW", {
                           dateStyle: "medium",

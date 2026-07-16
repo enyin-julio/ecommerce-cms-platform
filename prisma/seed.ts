@@ -229,6 +229,7 @@ async function main() {
   const demoOrder = await prisma.order.create({
     data: {
       id: demoOrderId,
+      orderNumber: "DE202607160001",
       merchantId: merchant.id,
       userId: customer.id,
       status: "pending",

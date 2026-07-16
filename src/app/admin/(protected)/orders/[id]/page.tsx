@@ -13,6 +13,7 @@ import {
 import { formatCurrency } from "@/lib/format";
 import { requireAdminSession } from "@/lib/rbac";
 import { getAdminOrderById } from "@/modules/orders/order.repository";
+import { getDisplayOrderNumber } from "@/modules/orders/order-number";
 import {
   getAllowedNextOrderStatuses,
   getOrderStatusHint
@@ -80,7 +81,7 @@ export default async function AdminOrderDetailPage({
         </Link>
         <h2 className="mt-3 text-2xl font-bold text-ink">訂單詳情</h2>
         <p className="mt-2 font-mono text-xs text-muted" data-testid="admin-order-id">
-          {order.id}
+          {getDisplayOrderNumber(order)}
         </p>
       </div>
 

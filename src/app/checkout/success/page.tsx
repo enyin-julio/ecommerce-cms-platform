@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/public/site-header";
 import { formatCurrency } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import { getDisplayOrderNumber } from "@/modules/orders/order-number";
 
 export const metadata: Metadata = {
   title: "訂單已建立"
@@ -34,6 +35,8 @@ export default async function CheckoutSuccessPage({
           id: params.orderId
         },
         select: {
+          id: true,
+          orderNumber: true,
           paymentStatus: true,
           total: true
         }
@@ -61,7 +64,7 @@ export default async function CheckoutSuccessPage({
               <div className="flex flex-col justify-between gap-1 sm:flex-row">
                 <span className="text-sm text-muted">訂單編號</span>
                 <span className="break-all text-sm font-semibold text-ink" data-testid="checkout-success-order-id">
-                  {params.orderId}
+                  {order ? getDisplayOrderNumber(order) : params.orderId}
                 </span>
               </div>
             ) : null}

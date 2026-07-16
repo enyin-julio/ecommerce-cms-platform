@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { createOrderNumber } from "@/modules/orders/order-number";
 import { getPaymentProvider } from "@/modules/payment/payment-provider.factory";
 
 export const CART_COOKIE_NAME = "commerce_cart_id";
@@ -212,8 +213,10 @@ export async function createOrderFromCart(input: CheckoutInput) {
   const paymentBlocked = isEcpayProductionBlocked();
 
   const order = await prisma.$transaction(async (tx) => {
+    const orderNumber = await createOrderNumber(tx, cart.merchantId);
     const createdOrder = await tx.order.create({
       data: {
+        orderNumber,
         merchantId: cart.merchantId,
         userId: input.userId || null,
         status: "pending",

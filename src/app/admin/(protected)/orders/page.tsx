@@ -9,6 +9,7 @@ import {
 import { formatCurrency } from "@/lib/format";
 import { requireAdminSession } from "@/lib/rbac";
 import { getAdminOrders, type AdminOrderFilters } from "@/modules/orders/order.repository";
+import { getDisplayOrderNumber } from "@/modules/orders/order-number";
 
 export const dynamic = "force-dynamic";
 
@@ -257,7 +258,9 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
                 {result.orders.length > 0 ? (
                   result.orders.map((order) => (
                     <tr key={order.id} className="hover:bg-slate-50" data-testid="admin-order-row">
-                      <td className="px-5 py-4 font-mono text-xs text-muted">{order.id}</td>
+                      <td className="px-5 py-4 font-mono text-xs text-muted">
+                        {getDisplayOrderNumber(order)}
+                      </td>
                       <td className="px-5 py-4 text-muted">
                         {order.createdAt.toLocaleDateString("zh-TW")}
                       </td>

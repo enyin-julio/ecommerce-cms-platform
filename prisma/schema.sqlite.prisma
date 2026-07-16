@@ -162,6 +162,7 @@ model CartItem {
 
 model Order {
   id              String               @id @default(cuid())
+  orderNumber     String?              @unique
   merchantId      String
   merchant        Merchant             @relation(fields: [merchantId], references: [id])
   userId          String?

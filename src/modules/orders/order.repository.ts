@@ -32,6 +32,7 @@ export function buildAdminOrderWhere(session: AdminSession, filters: AdminOrderF
     const keyword = filters.keyword.trim();
 
     where.OR = [
+      { orderNumber: { contains: keyword } },
       { id: { contains: keyword } },
       { customerName: { contains: keyword } },
       { customerPhone: { contains: keyword } },

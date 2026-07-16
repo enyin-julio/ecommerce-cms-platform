@@ -9,6 +9,7 @@ import {
   type PaymentStatus as PaymentStatusValue
 } from "@/lib/domain-types";
 import { getCustomerOrderById } from "@/modules/customers/customer.repository";
+import { getDisplayOrderNumber } from "@/modules/orders/order-number";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ const paymentStatusLabels: Record<PaymentStatusValue, string> = {
   paid: "已付款",
   failed: "付款失敗",
   cancelled: "付款取消",
-  expired: "付款逾時",
+  expired: "付款逾期",
   refunded: "已退款"
 };
 
@@ -57,14 +58,14 @@ export default async function AccountOrderDetailPage({ params }: AccountOrderDet
       <SiteHeader />
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <Link href="/account/orders" className="text-sm font-semibold text-brand-700 hover:text-brand-800">
-          返回訂單列表
+          返回我的訂單
         </Link>
         <div className="mt-4">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
             Order Detail
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">訂單詳情</h1>
-          <p className="mt-3 break-all text-sm text-muted">訂單編號：{order.id}</p>
+          <p className="mt-3 break-all text-sm text-muted">訂單編號：{getDisplayOrderNumber(order)}</p>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-4">
@@ -83,12 +84,12 @@ export default async function AccountOrderDetailPage({ params }: AccountOrderDet
 
           <aside className="space-y-4">
             <section className="rounded-lg border border-line bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-ink">收件資訊</h2>
+              <h2 className="text-lg font-bold text-ink">收件資料</h2>
               <div className="mt-4 space-y-3 text-sm">
                 <InfoRow label="姓名" value={order.customerName} />
                 <InfoRow label="電話" value={order.customerPhone} />
                 <InfoRow label="Email" value={order.customerEmail} />
-                <InfoRow label="地址" value={shippingAddress || "未提供"} />
+                <InfoRow label="地址" value={shippingAddress || "未填寫"} />
               </div>
             </section>
 
