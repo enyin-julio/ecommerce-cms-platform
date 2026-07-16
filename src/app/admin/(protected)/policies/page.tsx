@@ -64,7 +64,7 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
           </p>
           <h2 className="mt-3 text-3xl font-bold text-ink">商店政策</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            下方欄位有資料時，其內容會顯示於前台商店政策頁，方便消費者查看交易與服務規範。
+            每一項政策或條款都有自己的內容。點選上方項目後編輯該項內容，儲存時不會覆蓋其他項目。
           </p>
         </div>
         <Link
@@ -113,6 +113,7 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
         <div className="flex gap-3 overflow-x-auto bg-slate-50 p-5">
           {storePolicyDefinitions.map((item) => {
             const isActive = item.key === activePolicy.key;
+            const hasContent = Boolean(policy?.[item.key]);
 
             return (
               <Link
@@ -120,11 +121,22 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
                 href={`/admin/policies?merchantId=${selectedMerchant.id}&tab=${item.slug}`}
                 className={
                   isActive
-                    ? "whitespace-nowrap rounded bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
-                    : "whitespace-nowrap rounded border border-line bg-white px-5 py-3 text-sm font-semibold text-ink hover:border-brand-500"
+                    ? "flex min-w-36 flex-col gap-1 rounded bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
+                    : "flex min-w-36 flex-col gap-1 rounded border border-line bg-white px-5 py-3 text-sm font-semibold text-ink hover:border-brand-500"
                 }
               >
-                {item.title}
+                <span className="whitespace-nowrap">{item.title}</span>
+                <span
+                  className={
+                    isActive
+                      ? "text-xs font-medium text-slate-300"
+                      : hasContent
+                        ? "text-xs font-medium text-emerald-600"
+                        : "text-xs font-medium text-muted"
+                  }
+                >
+                  {hasContent ? "已設定內容" : "尚未設定"}
+                </span>
               </Link>
             );
           })}
@@ -138,6 +150,9 @@ export default async function AdminPoliciesPage({ searchParams }: AdminPoliciesP
             <div>
               <h3 className="text-2xl font-bold text-ink">{activePolicy.title}</h3>
               <p className="mt-2 text-sm leading-6 text-muted">{activePolicy.description}</p>
+              <p className="mt-2 text-sm font-medium text-brand-700">
+                這是「{activePolicy.title}」的專屬內容，儲存後只會更新這一項。
+              </p>
             </div>
             <Link
               href={`/policies/${activePolicy.slug}`}
