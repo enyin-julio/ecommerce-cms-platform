@@ -7,14 +7,19 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteSetting = await getPublicSiteSettingSafely();
   const siteName = siteSetting?.siteName || "UZEEK 品牌商城";
   const description =
-    siteSetting?.seoDescription || "探索 UZEEK 品牌商城的精選商品、品牌故事與最新活動。";
+    siteSetting?.seoDescription || "探索 UZEEK 智慧電子鎖與品牌服務，打造安心、便利的智慧生活。";
 
   return {
     title: {
       default: siteName,
       template: `%s | ${siteName}`
     },
-    description
+    description,
+    verification: siteSetting?.googleSearchConsoleVerification
+      ? {
+          google: siteSetting.googleSearchConsoleVerification
+        }
+      : undefined
   };
 }
 

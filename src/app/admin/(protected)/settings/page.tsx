@@ -45,13 +45,14 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
   const siteName = setting?.siteName || selectedMerchant?.name || "";
   const logoUrl = setting?.logoUrl || "";
   const primaryColor = setting?.primaryColor || "#2563eb";
+  const googleVerification = setting?.googleSearchConsoleVerification || "";
 
   if (!selectedMerchant) {
     return (
       <section className="rounded-lg border border-line bg-white p-8 text-center shadow-sm">
         <h2 className="text-2xl font-bold text-ink">網站設定</h2>
         <p className="mt-3 text-sm leading-6 text-muted">
-          目前沒有可設定的商家。請先建立商家資料後再回來設定網站。
+          目前沒有可管理的商家。請先建立商家，再回來設定網站名稱、Logo 與 SEO 資訊。
         </p>
       </section>
     );
@@ -66,7 +67,7 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
           </p>
           <h2 className="mt-3 text-3xl font-bold text-ink">網站設定</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            設定站名、Logo、品牌主色與 SEO 資訊。儲存後會同步影響前台首頁、導覽列與搜尋摘要。
+            管理前台會使用的站名、Logo、主色、SEO 資訊與 Google 搜尋收錄驗證。
           </p>
         </div>
         <a
@@ -121,7 +122,7 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
 
           <SettingsSection
             title="基本資料"
-            description="這些資料會顯示在前台導覽列、首頁與瀏覽器搜尋結果。"
+            description="這些資料會影響前台頁面標題、瀏覽器分頁名稱與搜尋結果摘要。"
           >
             <TextField
               label="網站名稱"
@@ -134,14 +135,14 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
               label="SEO 標題"
               name="seoTitle"
               defaultValue={setting?.seoTitle || ""}
-              placeholder="例如：UZEEK 智慧生活品牌商城"
+              placeholder="例如：UZEEK 智慧電子鎖品牌商城"
             />
             <label className="block">
               <span className="text-sm font-semibold text-ink">SEO 描述</span>
               <textarea
                 name="seoDescription"
                 defaultValue={setting?.seoDescription || ""}
-                placeholder="簡短描述網站內容，建議 80 到 160 字。"
+                placeholder="用 80 到 160 字描述網站特色，會顯示在搜尋結果摘要中。"
                 rows={4}
                 className="mt-2 w-full rounded border border-line px-4 py-3 text-sm outline-none focus:border-brand-500"
                 data-testid="admin-settings-seoDescription"
@@ -150,8 +151,8 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
           </SettingsSection>
 
           <SettingsSection
-            title="品牌外觀"
-            description="可從媒體庫選擇 Logo，也可以手動貼上外部圖片網址。"
+            title="品牌視覺"
+            description="設定前台 Logo 與主色，讓網站維持一致的品牌識別。"
           >
             <TextField
               label="品牌主色"
@@ -167,12 +168,34 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
               defaultValue={logoUrl}
               media={logoMediaOptions}
               testId="admin-settings-logoUrl"
-              helpText="Logo 會顯示在前台導覽列，建議使用透明背景 PNG 或 WebP。"
+              helpText="可從媒體庫選擇 Logo，也可以貼上圖片網址；建議使用 PNG 或 WebP。"
             />
           </SettingsSection>
 
+          <SettingsSection
+            title="Google 搜尋收錄"
+            description="對應 Google Search Console 的 HTML 標記驗證。貼上 content 內的驗證碼，或直接貼完整 meta 標籤，系統會自動整理。"
+          >
+            <TextField
+              label="Google Search Console 驗證碼"
+              name="googleSearchConsoleVerification"
+              defaultValue={googleVerification}
+              placeholder="例如：abc123-google-verification-code"
+            />
+            <div className="rounded-lg bg-slate-50 p-4 text-sm leading-6 text-muted">
+              <p className="font-semibold text-ink">操作方式</p>
+              <p className="mt-2">
+                進入 Google Search Console，新增網站資源後選擇「HTML 標記」。複製
+                <span className="mx-1 rounded bg-white px-1 font-mono text-xs text-ink">
+                  content=&quot;...&quot;
+                </span>
+                裡面的文字貼到此欄位，再儲存。回到 Google Search Console 按「驗證」即可。
+              </p>
+            </div>
+          </SettingsSection>
+
           <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted">儲存後會重新整理前台首頁、商品頁與品牌頁快取。</p>
+            <p className="text-sm text-muted">儲存後，前台與搜尋引擎 metadata 會套用最新設定。</p>
             <button
               type="submit"
               className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700"
@@ -200,28 +223,28 @@ export default async function AdminSettingsPage({ searchParams }: AdminSettingsP
                   className="flex h-12 w-12 items-center justify-center rounded text-sm font-bold text-white"
                   style={{ backgroundColor: primaryColor }}
                 >
-                  {siteName.slice(0, 1) || "站"}
+                  {siteName.slice(0, 1) || "店"}
                 </div>
               )}
               <div>
                 <p className="font-bold text-ink">{siteName}</p>
-                <p className="mt-1 text-xs text-muted">導覽列與首頁會使用這個名稱。</p>
+                <p className="mt-1 text-xs text-muted">這會顯示在前台導覽列與分頁名稱。</p>
               </div>
             </div>
             <div className="mt-5 rounded-lg bg-white p-4">
               <p className="text-xs font-semibold" style={{ color: primaryColor }}>
-                品牌電商 CMS
+                品牌電商
               </p>
               <p className="mt-2 text-xl font-bold text-ink">{siteName}</p>
               <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
                 {setting?.seoDescription ||
-                  "SEO 描述會顯示在首頁摘要與搜尋結果中，建議用一句話說清楚品牌定位。"}
+                  "SEO 描述會顯示在搜尋結果摘要，也會作為網站預設介紹文字。"}
               </p>
               <div
                 className="mt-4 inline-flex rounded-full px-4 py-2 text-xs font-semibold text-white"
                 style={{ backgroundColor: primaryColor }}
               >
-                主要按鈕顏色
+                主色按鈕預覽
               </div>
             </div>
           </div>

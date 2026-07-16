@@ -33,6 +33,7 @@ model Merchant {
   name         String
   slug         String       @unique
   contactEmail String
+  isActive     Boolean      @default(true)
   users        User[]
   products     Product[]
   categories   Category[]
@@ -308,6 +309,7 @@ model SiteSetting {
   primaryColor   String   @default("#2563eb")
   seoTitle       String?
   seoDescription String?
+  googleSearchConsoleVerification String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
