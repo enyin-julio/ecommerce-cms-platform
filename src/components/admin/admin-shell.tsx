@@ -7,6 +7,7 @@ const navItems = [
   { href: "/admin", label: "總覽" },
   { href: "/admin/merchants", label: "商家管理" },
   { href: "/admin/settings", label: "網站設定" },
+  { href: "/admin/themes", label: "主題管理" },
   { href: "/admin/marketing", label: "行銷管理" },
   { href: "/admin/pages", label: "頁面管理" },
   { href: "/admin/products", label: "商品管理" },

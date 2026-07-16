@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import type { ReactNode } from "react";
+import { getThemePresetById } from "@/lib/theme-presets";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 import "./globals.css";
 
@@ -36,6 +37,7 @@ export default async function RootLayout({
   return (
     <html lang="zh-Hant">
       <body>
+        <ThemeStyle siteSetting={siteSetting} />
         <MarketingScripts siteSetting={siteSetting} />
         {siteSetting?.googleTagManagerId ? (
           <noscript>
@@ -127,6 +129,44 @@ function MarketingScripts({ siteSetting }: { siteSetting: PublicSiteSetting | nu
         />
       ) : null}
     </>
+  );
+}
+
+function ThemeStyle({ siteSetting }: { siteSetting: PublicSiteSetting | null }) {
+  const theme = getThemePresetById(siteSetting?.themePreset);
+  const primaryColor = siteSetting?.primaryColor || theme.primaryColor;
+
+  return (
+    <style
+      id="site-theme-style"
+      dangerouslySetInnerHTML={{
+        __html: `
+          :root {
+            --site-theme-primary: ${primaryColor};
+            --site-theme-soft: ${theme.softColor};
+            --site-theme-accent: ${theme.accentColor};
+          }
+          .text-brand-600,
+          .text-brand-700,
+          .hover\\:text-brand-700:hover,
+          .hover\\:text-brand-800:hover {
+            color: var(--site-theme-primary) !important;
+          }
+          .bg-brand-600,
+          .hover\\:bg-brand-700:hover {
+            background-color: var(--site-theme-primary) !important;
+          }
+          .bg-brand-50 {
+            background-color: var(--site-theme-soft) !important;
+          }
+          .border-brand-500,
+          .hover\\:border-brand-500:hover,
+          .focus\\:border-brand-500:focus {
+            border-color: var(--site-theme-primary) !important;
+          }
+        `
+      }}
+    />
   );
 }
 

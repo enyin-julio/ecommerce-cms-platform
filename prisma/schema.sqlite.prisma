@@ -309,6 +309,8 @@ model SiteSetting {
   primaryColor   String   @default("#2563eb")
   seoTitle       String?
   seoDescription String?
+  themeLayout String? @default("multi-page")
+  themePreset String? @default("professional")
   googleSearchConsoleVerification String?
   googleTagManagerId String?
   googleAnalyticsMeasurementId String?
