@@ -13,6 +13,7 @@ import {
   removeHeroStyleBlocks
 } from "@/lib/cms-hero-style";
 import { PageType } from "@/lib/domain-types";
+import { getDefaultNavigationGroup, navigationGroups } from "@/lib/page-navigation";
 
 type PageWithMerchant = Page & {
   merchant: Merchant;
@@ -32,6 +33,8 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
     ? removeHeroStyleBlocks(page.contentBlocks as EditableContentBlock[])
     : [];
   const heroStyle = getHeroStyleFromBlocks(page?.contentBlocks || []);
+  const defaultNavigationGroup =
+    page?.navigationGroup || getDefaultNavigationGroup(page?.type || PageType.content);
   const mediaOptions = media.map((item) => ({
     id: item.id,
     url: item.url,
@@ -175,6 +178,42 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
           />
           發布到前台
         </label>
+      </FormSection>
+
+      <FormSection
+        title="前台選單設定"
+        description="頁面很多時，不會全部自動塞到前台選單。你可以決定是否顯示、放在哪一組，以及排序。"
+      >
+        <label className="flex items-center gap-3 rounded-lg bg-slate-50 p-4 text-sm font-semibold text-ink">
+          <input
+            name="showInNavigation"
+            type="checkbox"
+            defaultChecked={page?.showInNavigation ?? false}
+            className="h-4 w-4 rounded border-line text-brand-600"
+            data-testid="admin-page-showInNavigation"
+          />
+          顯示在前台選單
+        </label>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <SelectField
+            label="選單群組"
+            name="navigationGroup"
+            defaultValue={defaultNavigationGroup}
+            options={navigationGroups.map((group) => ({
+              label: group.label,
+              value: group.value
+            }))}
+          />
+          <TextField
+            label="排序"
+            name="navigationOrder"
+            type="number"
+            defaultValue={String(page?.navigationOrder ?? 0)}
+            min={0}
+            step={1}
+            placeholder="數字越小越前面"
+          />
+        </div>
       </FormSection>
 
       <div className="flex justify-end">

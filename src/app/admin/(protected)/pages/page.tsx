@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PageType, type PageType as PageTypeValue } from "@/lib/domain-types";
+import { getNavigationGroupLabel } from "@/lib/page-navigation";
 import { requireAdminSession } from "@/lib/rbac";
 import { getAdminPages } from "@/modules/content/page.repository";
 import {
@@ -154,7 +155,7 @@ export default async function AdminPagesPage({ searchParams }: AdminPagesPagePro
               <tr>
                 <th className="px-5 py-4">頁面名稱</th>
                 <th className="px-5 py-4">頁面類型</th>
-                <th className="px-5 py-4">前台顯示位置</th>
+                <th className="px-5 py-4">前台選單</th>
                 <th className="px-5 py-4">商家</th>
                 <th className="px-5 py-4">發布狀態</th>
                 <th className="px-5 py-4">最後更新</th>
@@ -176,16 +177,21 @@ export default async function AdminPagesPage({ searchParams }: AdminPagesPagePro
                       {typeLabels[page.type as PageTypeValue]}
                     </td>
                     <td className="px-5 py-4">
-                      {page.isPublished ? (
+                      {page.showInNavigation && page.isPublished ? (
                         <Link
                           href={getPublicPageHref(page)}
                           className="font-semibold text-brand-700 hover:text-brand-800"
                           target="_blank"
                         >
-                          {getDisplayLocation(page)}
+                          {getNavigationGroupLabel(page.navigationGroup)}
+                          <span className="ml-2 text-xs font-normal text-muted">
+                            排序 {page.navigationOrder}
+                          </span>
                         </Link>
+                      ) : page.isPublished ? (
+                        <span className="text-muted">已發布，不顯示於選單</span>
                       ) : (
-                        <span className="text-muted">發布後會顯示在前台</span>
+                        <span className="text-muted">發布後可設定選單</span>
                       )}
                     </td>
                     <td className="px-5 py-4 text-muted">{page.merchant.name}</td>
@@ -279,18 +285,6 @@ function getPublicPageHref(page: { slug: string; type: string }) {
   }
 
   return `/pages/${page.slug}`;
-}
-
-function getDisplayLocation(page: { slug: string; type: string }) {
-  if (page.type === PageType.brand) {
-    return "前台品牌介紹";
-  }
-
-  if (page.type === PageType.landing) {
-    return "前台導覽與首頁內容";
-  }
-
-  return "前台導覽與首頁內容";
 }
 
 function SummaryCard({ label, value }: { label: string; value: number }) {

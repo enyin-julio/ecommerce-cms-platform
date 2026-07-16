@@ -77,6 +77,7 @@ export async function getPublishedNavigationPages() {
   return prisma.page.findMany({
     where: {
       isPublished: true,
+      showInNavigation: true,
       merchant: {
         isActive: true
       }
@@ -87,16 +88,21 @@ export async function getPublishedNavigationPages() {
       slug: true,
       type: true,
       heroImageUrl: true,
-      heroSubtitle: true
+      heroSubtitle: true,
+      navigationGroup: true,
+      navigationOrder: true
     },
     orderBy: [
       {
-        type: "asc"
+        navigationGroup: "asc"
+      },
+      {
+        navigationOrder: "asc"
       },
       {
         updatedAt: "desc"
       }
     ],
-    take: 12
+    take: 30
   });
 }

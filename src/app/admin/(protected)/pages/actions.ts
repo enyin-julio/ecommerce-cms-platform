@@ -29,7 +29,10 @@ const pageSchema = z.object({
   contentBlocksJson: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
-  isPublished: z.boolean()
+  isPublished: z.boolean(),
+  showInNavigation: z.boolean(),
+  navigationGroup: z.string().optional(),
+  navigationOrder: z.coerce.number().int().min(0).default(0)
 });
 
 function parseContentBlocks(value: string): Prisma.InputJsonValue {
@@ -112,7 +115,10 @@ function parsePageForm(formData: FormData) {
     contentBlocksJson: formData.get("contentBlocksJson") || undefined,
     seoTitle: formData.get("seoTitle") || undefined,
     seoDescription: formData.get("seoDescription") || undefined,
-    isPublished: formData.get("isPublished") === "on"
+    isPublished: formData.get("isPublished") === "on",
+    showInNavigation: formData.get("showInNavigation") === "on",
+    navigationGroup: formData.get("navigationGroup") || undefined,
+    navigationOrder: formData.get("navigationOrder") || 0
   });
 
   return {
@@ -153,6 +159,7 @@ function withHeroStyleBlock(
 
 function revalidateCmsPagePaths(type: PageTypeValue, slug: string) {
   revalidatePath("/admin/pages");
+  revalidatePath("/");
   revalidatePath("/about");
   revalidatePath(`/landing/${slug}`);
   revalidatePath(`/pages/${slug}`);
@@ -184,7 +191,10 @@ export async function createPageAction(formData: FormData) {
       contentBlocks: data.contentBlocks,
       seoTitle: data.seoTitle || null,
       seoDescription: data.seoDescription || null,
-      isPublished: data.isPublished
+      isPublished: data.isPublished,
+      showInNavigation: data.showInNavigation,
+      navigationGroup: data.showInNavigation ? data.navigationGroup || null : null,
+      navigationOrder: data.navigationOrder
     }
   });
 
@@ -229,7 +239,10 @@ export async function updatePageAction(pageId: string, formData: FormData) {
       contentBlocks: data.contentBlocks,
       seoTitle: data.seoTitle || null,
       seoDescription: data.seoDescription || null,
-      isPublished: data.isPublished
+      isPublished: data.isPublished,
+      showInNavigation: data.showInNavigation,
+      navigationGroup: data.showInNavigation ? data.navigationGroup || null : null,
+      navigationOrder: data.navigationOrder
     }
   });
 
