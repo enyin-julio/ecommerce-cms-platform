@@ -356,6 +356,11 @@ model SiteSetting {
   seoDescription String?
   themeLayout String? @default("multi-page")
   themePreset String? @default("professional")
+  themeHeaderStyle String? @default("header-1")
+  themeFooterStyle String? @default("footer-1")
+  themeFontFamily String? @default("noto-sans-tc")
+  themeHeadingScale String? @default("default")
+  themeNavigationStyle String? @default("standard")
   googleSearchConsoleVerification String?
   googleTagManagerId String?
   googleAnalyticsMeasurementId String?

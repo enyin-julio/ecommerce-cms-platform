@@ -12,81 +12,81 @@ export type ThemePreset = {
 
 export const themePresets: ThemePreset[] = [
   {
-    id: "unique",
+    id: "brand-focus",
     layout: "one-page",
-    name: "獨有風格",
-    description: "適合品牌主視覺明確、想用單頁快速呈現重點的網站。",
-    primaryColor: "#7c3aed",
-    softColor: "#f3e8ff",
-    accentColor: "#f59e0b"
-  },
-  {
-    id: "quiet",
-    layout: "one-page",
-    name: "簡單靜謐",
-    description: "乾淨留白、節奏安靜，適合服務介紹與形象官網。",
-    primaryColor: "#0f766e",
-    softColor: "#ccfbf1",
-    accentColor: "#14b8a6"
-  },
-  {
-    id: "romantic",
-    layout: "one-page",
-    name: "優雅浪漫",
-    description: "柔和色調與精緻感，適合生活風格、美感商品與品牌故事。",
-    primaryColor: "#be185d",
-    softColor: "#fce7f3",
-    accentColor: "#f472b6"
-  },
-  {
-    id: "modern",
-    layout: "one-page",
-    name: "現代簡約",
-    description: "俐落、明亮、聚焦行動按鈕，適合新品發表與活動頁。",
+    name: "品牌焦點",
+    description: "適合品牌形象、服務介紹與單頁式活動頁，讓訪客快速理解品牌價值。",
     primaryColor: "#2563eb",
     softColor: "#dbeafe",
     accentColor: "#38bdf8"
   },
   {
+    id: "minimal-clean",
+    layout: "one-page",
+    name: "極簡留白",
+    description: "大量留白、簡潔排版，適合精品、顧問服務、設計感品牌。",
+    primaryColor: "#111827",
+    softColor: "#f3f4f6",
+    accentColor: "#94a3b8"
+  },
+  {
+    id: "warm-story",
+    layout: "one-page",
+    name: "溫潤故事",
+    description: "柔和配色與較親切的視覺節奏，適合生活風格、手作與內容型品牌。",
+    primaryColor: "#b45309",
+    softColor: "#fef3c7",
+    accentColor: "#f59e0b"
+  },
+  {
     id: "professional",
     layout: "multi-page",
-    name: "專業風格",
-    description: "穩重清楚，適合有商品、內容頁與服務說明的品牌商城。",
+    name: "專業品牌商城",
+    description: "適合正式營運的品牌電商，首頁、商品、內容頁與購物流程分工清楚。",
     primaryColor: "#1d4ed8",
     softColor: "#eef6ff",
     accentColor: "#0ea5e9"
   },
   {
-    id: "playful",
+    id: "catalog-first",
     layout: "multi-page",
-    name: "簡約趣味",
-    description: "帶一點活潑感，適合較輕鬆的商品型錄與內容經營。",
-    primaryColor: "#ea580c",
-    softColor: "#ffedd5",
-    accentColor: "#facc15"
+    name: "商品型錄優先",
+    description: "把商品分類與商品列表放在較明顯的位置，適合多品項型錄與詢價型網站。",
+    primaryColor: "#0f766e",
+    softColor: "#ccfbf1",
+    accentColor: "#14b8a6"
   },
   {
-    id: "aesthetic",
+    id: "campaign-bold",
     layout: "multi-page",
-    name: "簡約美學",
-    description: "低彩度、細緻感，適合重視質感與圖片呈現的品牌。",
+    name: "活動銷售強化",
+    description: "較強烈的視覺對比與行動按鈕，適合新品上市、檔期活動與銷售導向頁面。",
+    primaryColor: "#dc2626",
+    softColor: "#fee2e2",
+    accentColor: "#f97316"
+  },
+  {
+    id: "tech-blue",
+    layout: "multi-page",
+    name: "科技藍調",
+    description: "乾淨、穩定、偏科技感的配色，適合電子產品、SaaS 與 B2B 品牌。",
+    primaryColor: "#0284c7",
+    softColor: "#e0f2fe",
+    accentColor: "#22d3ee"
+  },
+  {
+    id: "editorial",
+    layout: "multi-page",
+    name: "雜誌內容風",
+    description: "適合內容量較多的品牌，把服務說明、品牌故事與商品資訊整理成清楚入口。",
     primaryColor: "#475569",
     softColor: "#f1f5f9",
-    accentColor: "#94a3b8"
-  },
-  {
-    id: "fashion",
-    layout: "multi-page",
-    name: "簡約時尚",
-    description: "高對比、俐落線條，適合科技、設計與精品感商品。",
-    primaryColor: "#111827",
-    softColor: "#f3f4f6",
     accentColor: "#6366f1"
   }
 ];
 
 export function getThemePresetById(id: string | null | undefined) {
-  return themePresets.find((theme) => theme.id === id) || themePresets[4];
+  return themePresets.find((theme) => theme.id === id) || themePresets[3];
 }
 
 export function getThemePresetsByLayout(layout: ThemeLayout) {

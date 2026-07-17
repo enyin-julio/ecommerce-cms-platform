@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteSetting = await getPublicSiteSettingSafely();
   const siteName = siteSetting?.siteName || "UZEEK 品牌商城";
   const description =
-    siteSetting?.seoDescription || "探索 UZEEK 智慧電子鎖與品牌服務，打造安心、便利的智慧生活。";
+    siteSetting?.seoDescription || "UZEEK 品牌商城提供精選商品、品牌故事與線上購物服務。";
 
   return {
     title: {
@@ -140,6 +140,8 @@ function MarketingScripts({ siteSetting }: { siteSetting: PublicSiteSetting | nu
 function ThemeStyle({ siteSetting }: { siteSetting: PublicSiteSetting | null }) {
   const theme = getThemePresetById(siteSetting?.themePreset);
   const primaryColor = siteSetting?.primaryColor || theme.primaryColor;
+  const fontFamily = getThemeFontFamily(siteSetting?.themeFontFamily);
+  const headingScale = getHeadingScale(siteSetting?.themeHeadingScale);
 
   return (
     <style
@@ -150,6 +152,16 @@ function ThemeStyle({ siteSetting }: { siteSetting: PublicSiteSetting | null }) 
             --site-theme-primary: ${primaryColor};
             --site-theme-soft: ${theme.softColor};
             --site-theme-accent: ${theme.accentColor};
+            --site-heading-scale: ${headingScale};
+          }
+          body {
+            font-family: ${fontFamily};
+          }
+          h1 {
+            font-size: calc(3rem * var(--site-heading-scale));
+          }
+          h2 {
+            font-size: calc(1.875rem * var(--site-heading-scale));
           }
           .text-brand-600,
           .text-brand-700,
@@ -173,6 +185,27 @@ function ThemeStyle({ siteSetting }: { siteSetting: PublicSiteSetting | null }) 
       }}
     />
   );
+}
+
+function getThemeFontFamily(value: string | null | undefined) {
+  const fontFamilies: Record<string, string> = {
+    "noto-sans-tc": '"Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif',
+    system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    serif: '"Noto Serif TC", "Songti TC", "PMingLiU", serif',
+    rounded: '"Microsoft JhengHei", "PingFang TC", "Arial Rounded MT Bold", system-ui, sans-serif'
+  };
+
+  return fontFamilies[value || ""] || fontFamilies["noto-sans-tc"];
+}
+
+function getHeadingScale(value: string | null | undefined) {
+  const scales: Record<string, string> = {
+    compact: "0.9",
+    default: "1",
+    large: "1.12"
+  };
+
+  return scales[value || ""] || scales.default;
 }
 
 async function getPublicSiteSettingSafely() {

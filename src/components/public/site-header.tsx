@@ -7,9 +7,9 @@ import { getPublishedNavigationPages } from "@/modules/content/page.repository";
 import { getPublicSiteSetting } from "@/modules/settings/site-setting.repository";
 
 const pageTypeLabels: Record<PageTypeValue, string> = {
-  brand: "品牌介紹",
-  landing: "活動頁",
-  content: "內容頁"
+  brand: "品牌形象頁",
+  landing: "形象廣告頁",
+  content: "一般內容頁"
 };
 
 export async function SiteHeader() {
@@ -26,23 +26,27 @@ export async function SiteHeader() {
       pages: pages.filter((page) => page.navigationGroup === group.value)
     }))
     .filter((group) => group.pages.length > 0);
+  const headerStyle = siteSetting?.themeHeaderStyle || "header-1";
+  const navigationStyle = siteSetting?.themeNavigationStyle || "standard";
+  const shellClass = getHeaderShellClass(headerStyle);
+  const navClass = getNavClass(navigationStyle);
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className={shellClass}>
         <Link href="/" className="flex items-center gap-3 text-lg font-bold tracking-tight text-ink">
           {siteSetting?.logoUrl ? (
             <Image
               src={siteSetting.logoUrl}
               alt={`${siteName} Logo`}
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-md object-contain"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-md object-contain"
             />
           ) : null}
           <span>{siteName}</span>
         </Link>
-        <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-muted">
+        <nav className={navClass} aria-label="前台導覽">
           <Link className="hover:text-ink" href="/about">
             {brandPage?.title || "品牌介紹"}
           </Link>
@@ -104,6 +108,38 @@ export async function SiteHeader() {
       </div>
     </header>
   );
+}
+
+function getHeaderShellClass(headerStyle: string) {
+  const base = "mx-auto flex max-w-6xl flex-col gap-3 px-4 sm:px-6";
+
+  if (headerStyle === "header-2") {
+    return `${base} items-center py-5 text-center`;
+  }
+
+  if (headerStyle === "header-3") {
+    return `${base} py-6 lg:flex-row lg:items-center lg:justify-between`;
+  }
+
+  if (headerStyle === "header-4") {
+    return `${base} py-3 lg:flex-row lg:items-center lg:justify-between`;
+  }
+
+  return `${base} py-4 lg:flex-row lg:items-center lg:justify-between`;
+}
+
+function getNavClass(navigationStyle: string) {
+  const base = "flex flex-wrap items-center text-sm font-medium text-muted";
+
+  if (navigationStyle === "centered") {
+    return `${base} justify-center gap-x-5 gap-y-2`;
+  }
+
+  if (navigationStyle === "compact") {
+    return `${base} gap-x-3 gap-y-2 text-xs`;
+  }
+
+  return `${base} gap-x-4 gap-y-2`;
 }
 
 function getPublicPageHref(page: { slug: string; type: string }) {
