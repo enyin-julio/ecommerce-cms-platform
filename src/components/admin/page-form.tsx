@@ -29,9 +29,10 @@ type PageFormProps = {
 
 export function PageForm({ action, page, merchants, media, submitLabel }: PageFormProps) {
   const selectedMerchantId = page?.merchantId || merchants[0]?.id || "";
-  const contentBlocks = Array.isArray(page?.contentBlocks)
-    ? removeHeroStyleBlocks(page.contentBlocks as EditableContentBlock[])
+  const rawBlocks = Array.isArray(page?.contentBlocks)
+    ? (page.contentBlocks as EditableContentBlock[])
     : [];
+  const contentBlocks = removeHeroStyleBlocks(rawBlocks);
   const heroStyle = getHeroStyleFromBlocks(page?.contentBlocks || []);
   const defaultNavigationGroup =
     page?.navigationGroup || getDefaultNavigationGroup(page?.type || PageType.content);
@@ -51,37 +52,28 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
     >
       <FormSection
         title="頁面歸屬"
-        description="選擇頁面所屬商家，以及前台要使用的頁面型態。"
+        description="選擇頁面所屬商家，以及前台要使用的頁面類型。"
       >
         <div className="grid gap-5 sm:grid-cols-2">
-          <label className="block">
-            <span className="text-sm font-semibold text-ink">商家</span>
-            <select
-              name="merchantId"
-              defaultValue={selectedMerchantId}
-              className="mt-2 min-h-12 w-full rounded border border-line px-4 text-sm outline-none focus:border-brand-500"
-              data-testid="admin-page-merchantId"
-            >
-              {merchants.map((merchant) => (
-                <option key={merchant.id} value={merchant.id}>
-                  {merchant.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-sm font-semibold text-ink">頁面類型</span>
-            <select
-              name="type"
-              defaultValue={page?.type || PageType.content}
-              className="mt-2 min-h-12 w-full rounded border border-line px-4 text-sm outline-none focus:border-brand-500"
-              data-testid="admin-page-type"
-            >
-              <option value={PageType.brand}>品牌形象頁</option>
-              <option value={PageType.landing}>形象廣告頁</option>
-              <option value={PageType.content}>一般內容頁</option>
-            </select>
-          </label>
+          <SelectField
+            label="商家"
+            name="merchantId"
+            defaultValue={selectedMerchantId}
+            options={merchants.map((merchant) => ({
+              label: merchant.name,
+              value: merchant.id
+            }))}
+          />
+          <SelectField
+            label="頁面類型"
+            name="type"
+            defaultValue={page?.type || PageType.content}
+            options={[
+              { label: "品牌形象頁", value: PageType.brand },
+              { label: "形象廣告頁", value: PageType.landing },
+              { label: "一般內容頁", value: PageType.content }
+            ]}
+          />
         </div>
       </FormSection>
 
@@ -95,7 +87,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
             label="網址代號（Slug）"
             name="slug"
             defaultValue={page?.slug}
-            placeholder="例如：service-info"
+            placeholder="例如 service-info"
             required
           />
         </div>
@@ -118,7 +110,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
           defaultValue={page?.heroImageUrl || ""}
           media={mediaOptions}
           testId="admin-page-heroImageUrl"
-          helpText="可從媒體庫選擇圖片，或直接貼上圖片網址。"
+          helpText="可以從媒體庫選擇圖片，或直接貼上圖片網址。"
         />
         <div className="grid gap-5 sm:grid-cols-2">
           <SelectField
@@ -150,14 +142,14 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
 
       <FormSection
         title="內容區塊"
-        description="使用拖拉編輯器新增文字、圖片或按鈕區塊。拖曳卡片即可調整前台顯示順序。"
+        description="使用文字、圖片與按鈕區塊建立頁面內容。可以拖曳排序，也可以刪除不需要的區塊。"
       >
         <ContentBlockEditor initialBlocks={contentBlocks} media={mediaOptions} />
       </FormSection>
 
       <FormSection
-        title="SEO 與發布"
-        description="SEO 標題與描述會提供搜尋引擎使用。勾選發布後，前台才會顯示這個頁面。"
+        title="SEO 搜尋設定"
+        description="SEO 標題與描述會提供給搜尋引擎與社群分享使用。"
       >
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField label="SEO 標題" name="seoTitle" defaultValue={page?.seoTitle || ""} />
@@ -182,7 +174,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
 
       <FormSection
         title="前台選單設定"
-        description="頁面很多時，不會全部自動塞到前台選單。你可以決定是否顯示、放在哪一組，以及排序。"
+        description="若勾選顯示在選單，頁面會依照分組與排序出現在前台導覽。"
       >
         <label className="flex items-center gap-3 rounded-lg bg-slate-50 p-4 text-sm font-semibold text-ink">
           <input
@@ -196,7 +188,7 @@ export function PageForm({ action, page, merchants, media, submitLabel }: PageFo
         </label>
         <div className="grid gap-5 sm:grid-cols-2">
           <SelectField
-            label="選單群組"
+            label="選單分組"
             name="navigationGroup"
             defaultValue={defaultNavigationGroup}
             options={navigationGroups.map((group) => ({

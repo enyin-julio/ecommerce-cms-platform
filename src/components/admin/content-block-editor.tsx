@@ -102,7 +102,7 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
 
       {blocks.length === 0 ? (
         <div className="rounded-lg border border-dashed border-line bg-slate-50 p-6 text-sm leading-6 text-muted">
-          目前沒有內容區塊。請先點上方按鈕新增文字、圖片或按鈕區塊。
+          目前沒有內容區塊。請新增文字、圖片或按鈕區塊。
         </div>
       ) : null}
 
@@ -130,7 +130,7 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
                 <p className="text-sm font-bold text-ink">
                   {index + 1}. {blockTypeLabels[block.type]}
                 </p>
-                <p className="mt-1 text-xs text-muted">拖曳卡片可調整前台顯示順序。</p>
+                <p className="mt-1 text-xs text-muted">可拖曳排序，也可用上下移動按鈕調整。</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <SmallButton
@@ -152,15 +152,15 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
                 label="區塊標題"
                 value={block.title}
                 onChange={(value) => updateBlock(index, { title: value })}
-                placeholder="例如：服務特色"
+                placeholder="例如 服務特色"
               />
 
               {block.type === "text" ? (
                 <TextArea
-                  label="內文"
+                  label="文字內容"
                   value={block.body}
                   onChange={(value) => updateBlock(index, { body: value })}
-                  placeholder="直接輸入前台要顯示的內容，換行會保留。"
+                  placeholder="輸入想顯示在前台頁面的文字內容。"
                 />
               ) : null}
 
@@ -170,7 +170,7 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
                     label="圖片網址"
                     value={block.imageUrl}
                     onChange={(value) => updateBlock(index, { imageUrl: value })}
-                    placeholder="可貼圖片網址，或從下方媒體庫選擇"
+                    placeholder="貼上圖片網址，或從下方媒體庫選擇。"
                   />
                   {media.length > 0 ? (
                     <label className="block">
@@ -194,10 +194,10 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
                     </label>
                   ) : null}
                   <TextArea
-                    label="圖片說明（選填）"
+                    label="圖片說明"
                     value={block.body}
                     onChange={(value) => updateBlock(index, { body: value })}
-                    placeholder="這段文字會顯示在圖片下方。"
+                    placeholder="可補充圖片說明，協助訪客理解內容。"
                   />
                 </>
               ) : null}
@@ -208,13 +208,13 @@ export function ContentBlockEditor({ initialBlocks, media }: ContentBlockEditorP
                     label="按鈕文字"
                     value={block.buttonText}
                     onChange={(value) => updateBlock(index, { buttonText: value })}
-                    placeholder="例如：查看商品"
+                    placeholder="例如 查看商品"
                   />
                   <TextField
                     label="按鈕連結"
                     value={block.buttonUrl}
                     onChange={(value) => updateBlock(index, { buttonUrl: value })}
-                    placeholder="例如：/products"
+                    placeholder="例如 /products"
                   />
                 </div>
               ) : null}
@@ -261,7 +261,7 @@ function createEmptyBlock(type: BlockType): EditorBlock {
   return {
     id: createId(),
     type,
-    title: type === "cta" ? "了解更多" : "",
+    title: type === "cta" ? "行動呼籲" : "",
     body: "",
     imageUrl: "",
     buttonText: type === "cta" ? "查看商品" : "",

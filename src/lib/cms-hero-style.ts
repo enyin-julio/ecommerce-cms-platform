@@ -2,14 +2,14 @@ import type { CSSProperties } from "react";
 import type { JsonValue } from "@prisma/client/runtime/library";
 
 export const heroFontFamilyOptions = [
-  { label: "預設字型", value: "system", css: undefined },
+  { label: "使用全站字型", value: "system", css: undefined },
   { label: "黑體 / 無襯線", value: "sans", css: 'Arial, "Noto Sans TC", sans-serif' },
   { label: "明體 / 襯線", value: "serif", css: '"Noto Serif TC", "PMingLiU", serif' },
-  { label: "等寬字", value: "mono", css: '"Courier New", monospace' }
+  { label: "等寬字型", value: "mono", css: '"Courier New", monospace' }
 ] as const;
 
 export const heroTitleFontSizeOptions = [
-  { label: "預設大小", value: "" },
+  { label: "使用預設大小", value: "" },
   { label: "32px", value: "32px" },
   { label: "40px", value: "40px" },
   { label: "48px", value: "48px" },
@@ -19,7 +19,7 @@ export const heroTitleFontSizeOptions = [
 ] as const;
 
 export const heroSubtitleFontSizeOptions = [
-  { label: "預設大小", value: "" },
+  { label: "使用預設大小", value: "" },
   { label: "16px", value: "16px" },
   { label: "18px", value: "18px" },
   { label: "20px", value: "20px" },
@@ -51,7 +51,7 @@ export function getHeroStyleFromBlocks(blocks: JsonValue): HeroStyle {
 }
 
 export function removeHeroStyleBlocks<T extends { type?: string }>(blocks: T[]) {
-  return blocks.filter((block) => block.type !== "heroStyle");
+  return blocks.filter((block) => block && block.type !== "heroStyle");
 }
 
 export function createHeroStyleBlock(style: HeroStyle): HeroStyleBlock | null {
