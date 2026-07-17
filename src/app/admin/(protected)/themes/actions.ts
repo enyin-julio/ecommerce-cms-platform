@@ -58,12 +58,22 @@ export async function applyThemeAction(formData: FormData) {
       siteName: merchant.name,
       themeLayout: theme.layout,
       themePreset: theme.id,
-      primaryColor: theme.primaryColor
+      primaryColor: theme.primaryColor,
+      themeHeaderStyle: theme.headerStyle,
+      themeFooterStyle: theme.footerStyle,
+      themeFontFamily: theme.fontFamily,
+      themeHeadingScale: theme.headingScale,
+      themeNavigationStyle: theme.navigationStyle
     },
     update: {
       themeLayout: theme.layout,
       themePreset: theme.id,
-      primaryColor: theme.primaryColor
+      primaryColor: theme.primaryColor,
+      themeHeaderStyle: theme.headerStyle,
+      themeFooterStyle: theme.footerStyle,
+      themeFontFamily: theme.fontFamily,
+      themeHeadingScale: theme.headingScale,
+      themeNavigationStyle: theme.navigationStyle
     }
   });
 

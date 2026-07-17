@@ -8,6 +8,11 @@ export type ThemePreset = {
   primaryColor: string;
   softColor: string;
   accentColor: string;
+  headerStyle: "header-1" | "header-2" | "header-3" | "header-4";
+  footerStyle: "footer-1" | "footer-2" | "footer-3" | "footer-4";
+  fontFamily: "noto-sans-tc" | "system" | "serif" | "rounded";
+  headingScale: "compact" | "default" | "large";
+  navigationStyle: "standard" | "centered" | "compact";
 };
 
 export const themePresets: ThemePreset[] = [
@@ -18,7 +23,12 @@ export const themePresets: ThemePreset[] = [
     description: "適合品牌形象、服務介紹與單頁式活動頁，讓訪客快速理解品牌價值。",
     primaryColor: "#2563eb",
     softColor: "#dbeafe",
-    accentColor: "#38bdf8"
+    accentColor: "#38bdf8",
+    headerStyle: "header-3",
+    footerStyle: "footer-4",
+    fontFamily: "noto-sans-tc",
+    headingScale: "large",
+    navigationStyle: "centered"
   },
   {
     id: "minimal-clean",
@@ -27,7 +37,12 @@ export const themePresets: ThemePreset[] = [
     description: "大量留白、簡潔排版，適合精品、顧問服務、設計感品牌。",
     primaryColor: "#111827",
     softColor: "#f3f4f6",
-    accentColor: "#94a3b8"
+    accentColor: "#94a3b8",
+    headerStyle: "header-4",
+    footerStyle: "footer-3",
+    fontFamily: "system",
+    headingScale: "compact",
+    navigationStyle: "compact"
   },
   {
     id: "warm-story",
@@ -36,7 +51,12 @@ export const themePresets: ThemePreset[] = [
     description: "柔和配色與較親切的視覺節奏，適合生活風格、手作與內容型品牌。",
     primaryColor: "#b45309",
     softColor: "#fef3c7",
-    accentColor: "#f59e0b"
+    accentColor: "#f59e0b",
+    headerStyle: "header-2",
+    footerStyle: "footer-4",
+    fontFamily: "rounded",
+    headingScale: "default",
+    navigationStyle: "centered"
   },
   {
     id: "professional",
@@ -45,7 +65,12 @@ export const themePresets: ThemePreset[] = [
     description: "適合正式營運的品牌電商，首頁、商品、內容頁與購物流程分工清楚。",
     primaryColor: "#1d4ed8",
     softColor: "#eef6ff",
-    accentColor: "#0ea5e9"
+    accentColor: "#0ea5e9",
+    headerStyle: "header-1",
+    footerStyle: "footer-1",
+    fontFamily: "noto-sans-tc",
+    headingScale: "default",
+    navigationStyle: "standard"
   },
   {
     id: "catalog-first",
@@ -54,7 +79,12 @@ export const themePresets: ThemePreset[] = [
     description: "把商品分類與商品列表放在較明顯的位置，適合多品項型錄與詢價型網站。",
     primaryColor: "#0f766e",
     softColor: "#ccfbf1",
-    accentColor: "#14b8a6"
+    accentColor: "#14b8a6",
+    headerStyle: "header-1",
+    footerStyle: "footer-2",
+    fontFamily: "system",
+    headingScale: "default",
+    navigationStyle: "standard"
   },
   {
     id: "campaign-bold",
@@ -63,7 +93,12 @@ export const themePresets: ThemePreset[] = [
     description: "較強烈的視覺對比與行動按鈕，適合新品上市、檔期活動與銷售導向頁面。",
     primaryColor: "#dc2626",
     softColor: "#fee2e2",
-    accentColor: "#f97316"
+    accentColor: "#f97316",
+    headerStyle: "header-3",
+    footerStyle: "footer-2",
+    fontFamily: "noto-sans-tc",
+    headingScale: "large",
+    navigationStyle: "standard"
   },
   {
     id: "tech-blue",
@@ -72,7 +107,12 @@ export const themePresets: ThemePreset[] = [
     description: "乾淨、穩定、偏科技感的配色，適合電子產品、SaaS 與 B2B 品牌。",
     primaryColor: "#0284c7",
     softColor: "#e0f2fe",
-    accentColor: "#22d3ee"
+    accentColor: "#22d3ee",
+    headerStyle: "header-4",
+    footerStyle: "footer-1",
+    fontFamily: "system",
+    headingScale: "compact",
+    navigationStyle: "compact"
   },
   {
     id: "editorial",
@@ -81,7 +121,12 @@ export const themePresets: ThemePreset[] = [
     description: "適合內容量較多的品牌，把服務說明、品牌故事與商品資訊整理成清楚入口。",
     primaryColor: "#475569",
     softColor: "#f1f5f9",
-    accentColor: "#6366f1"
+    accentColor: "#6366f1",
+    headerStyle: "header-2",
+    footerStyle: "footer-2",
+    fontFamily: "serif",
+    headingScale: "large",
+    navigationStyle: "centered"
   }
 ];
 
